@@ -9,10 +9,10 @@
     "TB": 1000000000000,
   };
 
-	let encryptionEnabled = false;
-  let fileName = "drop file here";
-  let fileSize = "or, click to choose";
-  let iconSrc = "/icons/upload.svg";
+	let encryptionEnabled = $state(false);
+  let fileName = $state("drop file here");
+  let fileSize = $state("or, click to choose");
+  let iconSrc = $state("/icons/upload.svg");
 
 	function toggleEncryption() {
 		encryptionEnabled = !encryptionEnabled;
