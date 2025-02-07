@@ -1,0 +1,72 @@
+@use "./vars" as *;
+
+body {
+  background-color: $bg;
+  font-family: $font;
+  color: $fg;
+  margin: 0;
+  font-size: $font-size;
+}
+
+h1 {
+  font-size: $header-size;
+  margin: 0;
+}
+
+button {
+  all: unset;
+  background-color: $bg-0-soft;
+  padding: 10px 15px;
+  box-sizing: border-box;
+  cursor: pointer;
+  text-align: center;
+}
+
+button:focus {
+  outline: $focus-outline;
+}
+
+button.upload {
+  border: $module-border solid $fg-1;
+}
+
+::placeholder {
+  color: $bg-4;
+  opacity: 1;
+}
+
+textarea {
+  all: unset;
+  resize: vertical;
+  background-color: $bg-0-soft;
+  padding: $small-padding;
+  box-sizing: border-box;
+  font-size: $small-font-size;
+}
+
+textarea:focus {
+  outline: $focus-outline;
+}
+
+input {
+  all: unset;
+  background-color: $bg-0-soft;
+  border: $module-border solid $fg-1;
+  height: 33px;
+  padding-left: $small-padding;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+input[type="password"] {
+  letter-spacing: 5px;
+  font-size: $password-font-size;
+}
+
+input[type="password"]:focus {
+  outline: $focus-outline;
+}
+
+.switch:focus {
+  outline: $focus-outline;
+}

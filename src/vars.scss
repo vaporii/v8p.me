@@ -1,0 +1,27 @@
+$bg: #282828; // actual background
+$fg: #EBDBB2; // text
+$fg-1: #A89984; // light borders
+$bg-0: #1D2021; // panel bg
+$bg-0-soft: #32302F; // umm like textboxes and stuff
+$bg-1: #3C3836;
+$bg-2: #504945; // border
+$bg-3: #665C54; // border text
+$bg-4: #7C6F64; // placeholder text
+$accent: #458588;
+
+$font: "JetBrains Mono Variable", monospace;
+$header-size: 24px;
+$font-size: 18px;
+$small-font-size: 16px;
+$password-font-size: 12px;
+
+$padding: 15px;
+$small-padding: 10px; // textarea placeholder
+$top-padding: 3px;
+
+$module-border: 2px;
+$module-text-pad: 10px;
+$module-text-left: 30px;
+$module-text-top: 2px;
+
+$focus-outline: $module-border solid $accent;
