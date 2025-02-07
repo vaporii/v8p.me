@@ -14,7 +14,9 @@
   let fileSize = $state("or, click to choose");
   let iconSrc = $state("/icons/upload.svg");
 
-	let file: File | undefined = undefined;
+	let dragging = $state(false);
+
+	let file: File | undefined = $state();
 	
 	function toggleEncryption() {
 		encryptionEnabled = !encryptionEnabled;
@@ -38,6 +40,44 @@
 		file = undefined;
 
 		// cancel upload process
+	}
+
+	function uploadFile() {
+
+	}
+
+	let enterTarget: EventTarget | null; // janky fix for javascript's shitty drag and drop api
+	function dropHandler(e: DragEvent) {
+		e.preventDefault();
+		dragging = false;
+
+		if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
+			if (e.dataTransfer.items[0].kind !== "file") return;
+			file = e.dataTransfer.items[0].getAsFile() as File;
+
+			fileName = file.name;
+      fileSize = formatSize(file.size);
+      iconSrc = "/icons/file.svg";
+		}
+	}
+
+	function dragOverHandler(e: DragEvent) {
+		e.preventDefault();
+	}
+
+	function dragEnterHandler(e: Event) {
+		enterTarget = e.target;
+		e.stopPropagation();
+		e.preventDefault();
+		dragging = true;
+	}
+
+	function dragLeaveHandler(e: Event) {
+		if (enterTarget === e.target) {
+			e.stopPropagation();
+			e.preventDefault();
+			dragging = false;
+		}
 	}
 
   function formatSize(bytes: number): string {
@@ -69,7 +109,15 @@
 	<Module text="upload file">
 		<div class="upload-file">
       <input type="file" name="file-upload" id="file-upload" onchange={handleFileChange} />
-      <label id="file-select" for="file-upload">
+      <label
+				id="file-select"
+				class={dragging ? "dragging" : ""}
+				for="file-upload"
+				ondrop={dropHandler}
+				ondragover={dragOverHandler}
+				ondragenter={dragEnterHandler}
+				ondragleave={dragLeaveHandler}
+			>
         <img src={iconSrc} alt="upload file icon" class="upload-icon" />
         <span class="big-text">{fileName}</span>
         <span class="little-text">{fileSize}</span>
@@ -79,10 +127,10 @@
 				<span class="or-text">OR</span>
 				<span class="or-line"></span>
 			</div>
-			<textarea name="text" id="text" placeholder="write some text..."></textarea>
+			<textarea name="text" id="text" placeholder="write some text..." disabled={!!file}></textarea>
 			<div class="bottom-buttons">
 				<button class="cancel" onclick={cancelUpload}>cancel</button>
-				<button class="upload">upload file or text</button>
+				<button class="upload" onclick={uploadFile}>upload file or text</button>
 			</div>
 		</div>
 	</Module>
@@ -94,7 +142,7 @@
 			</button>
 
 			<span class="option-label">password</span>
-			<input type="password" class="textbox" />
+			<input type="password" class="textbox" disabled={!encryptionEnabled} />
 		</div>
 	</Module>
 </div>
@@ -131,6 +179,10 @@
 
 		background-color: $bg-0-soft;
 		cursor: pointer;
+	}
+
+	.dragging {
+		border: $drag-border;
 	}
 
 	.upload-icon {

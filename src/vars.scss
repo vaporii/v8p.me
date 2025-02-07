@@ -9,6 +9,8 @@ $bg-3: #665C54; // border text
 $bg-4: #7C6F64; // placeholder text
 $accent: #458588;
 
+$disabled-opacity: 50%;
+
 $font: "JetBrains Mono Variable", monospace;
 $header-size: 24px;
 $font-size: 18px;
@@ -25,3 +27,4 @@ $module-text-left: 30px;
 $module-text-top: 2px;
 
 $focus-outline: $module-border solid $accent;
+$drag-border: $module-border dashed $accent;

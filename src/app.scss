@@ -48,6 +48,16 @@ textarea:focus {
   outline: $focus-outline;
 }
 
+textarea:disabled {
+  opacity: $disabled-opacity;
+  cursor: default;
+}
+
+input:disabled {
+  opacity: $disabled-opacity;
+  cursor: default;
+}
+
 input {
   all: unset;
   background-color: $bg-0-soft;
