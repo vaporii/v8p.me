@@ -13,6 +13,8 @@
   let fileName = $state("drop file here");
   let fileSize = $state("or, click to choose");
   let iconSrc = $state("/icons/upload.svg");
+	let text = $state("");
+	let password = $state("");
 
 	let dragging = $state(false);
 
@@ -38,12 +40,55 @@
 		iconSrc = "/icons/upload.svg";
 
 		file = undefined;
+		text = "";
 
 		// cancel upload process
 	}
 
-	function uploadFile() {
+	function progressEvent(progress: ProgressEvent<XMLHttpRequestEventTarget>) {
+		console.log(progress.loaded);
+		console.log(progress.total);
+	}
 
+	function encryptFile(blob: Blob, password: string): Blob {
+		
+	}
+	
+	function uploadFile() {
+		let blob: Blob;
+		let size: number;
+		let name: string;
+		if (file) {
+			console.log("uploading file");
+			blob = new Blob([file]);
+			size = file.size;
+			name = file.name;
+		} else if (text.length > 0) {
+			console.log("uploading text");
+			blob = new Blob([new TextEncoder().encode(text)]);
+			name = "text.txt"; // TODO: custom names
+			size = blob.size;
+		} else return;
+
+		if (encryptionEnabled) {
+			if (password.length < 0) {
+				alert("password empty :("); // TODO: replace with an actual error
+				return;
+			}
+
+			blob = encryptFile(blob, password);
+		}
+
+		const form = new FormData();
+		form.append("filename", fileName) // TODO: check filename and make sure it's umm longer than 0 characters
+		form.append("filesize", size.toString());
+		form.append("file", new Blob([blob]));
+		
+		const xhr = new XMLHttpRequest();
+		xhr.open("POST", "/");
+		xhr.addEventListener("progress", progressEvent);
+		
+		xhr.send(form);
 	}
 
 	let enterTarget: EventTarget | null; // janky fix for javascript's shitty drag and drop api
@@ -127,7 +172,7 @@
 				<span class="or-text">OR</span>
 				<span class="or-line"></span>
 			</div>
-			<textarea name="text" id="text" placeholder="write some text..." disabled={!!file}></textarea>
+			<textarea name="text" id="text" placeholder="write some text..." disabled={!!file} bind:value={text}></textarea>
 			<div class="bottom-buttons">
 				<button class="cancel" onclick={cancelUpload}>cancel</button>
 				<button class="upload" onclick={uploadFile}>upload file or text</button>
@@ -136,13 +181,13 @@
 	</Module>
 	<Module text="options">
 		<div class="options">
-			<span class="option-label">encryption</span>
+			<span class="option-label">encryption</span> <!-- NOTE: add a (?) note that tells the user it's client-side encrypted, the filename is not though -->
 			<button class="switch" onclick={toggleEncryption} aria-label="Toggle Encryption">
 				<div class={(encryptionEnabled ? 'switch-active ' : '') + 'switch-circle'}></div>
 			</button>
 
 			<span class="option-label">password</span>
-			<input type="password" class="textbox" disabled={!encryptionEnabled} />
+			<input type="password" class="textbox" disabled={!encryptionEnabled} bind:value={password} />
 		</div>
 	</Module>
 </div>
