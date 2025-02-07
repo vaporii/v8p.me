@@ -14,6 +14,8 @@
   let fileSize = $state("or, click to choose");
   let iconSrc = $state("/icons/upload.svg");
 
+	let file: File | undefined = undefined;
+	
 	function toggleEncryption() {
 		encryptionEnabled = !encryptionEnabled;
 	}
@@ -21,12 +23,22 @@
   function handleFileChange(e: Event) {
     const target = e.target as HTMLInputElement;
     if (target.files && target.files.length > 0) {
-      const file = target.files[0];
+      file = target.files[0];
       fileName = file.name;
       fileSize = formatSize(file.size);
-      iconSrc = "/icons/upload.svg";
+      iconSrc = "/icons/file.svg";
     }
   }
+
+	function cancelUpload() {
+		fileName = "drop file here";
+		fileSize = "or, click to choose";
+		iconSrc = "/icons/upload.svg";
+
+		file = undefined;
+
+		// cancel upload process
+	}
 
   function formatSize(bytes: number): string {
     let formatted = 0.0;
@@ -56,9 +68,9 @@
 <div class="center">
 	<Module text="upload file">
 		<div class="upload-file">
-      <input type="file" name="file-upload" id="file-upload" />
+      <input type="file" name="file-upload" id="file-upload" onchange={handleFileChange} />
       <label id="file-select" for="file-upload">
-        <img src="{iconSrc}" alt="upload file icon" class="upload-icon" />
+        <img src={iconSrc} alt="upload file icon" class="upload-icon" />
         <span class="big-text">{fileName}</span>
         <span class="little-text">{fileSize}</span>
       </label>
@@ -69,12 +81,12 @@
 			</div>
 			<textarea name="text" id="text" placeholder="write some text..."></textarea>
 			<div class="bottom-buttons">
-				<button class="cancel">cancel</button>
+				<button class="cancel" onclick={cancelUpload}>cancel</button>
 				<button class="upload">upload file or text</button>
 			</div>
 		</div>
 	</Module>
-	<Module text="options" className="options-module">
+	<Module text="options">
 		<div class="options">
 			<span class="option-label">encryption</span>
 			<button class="switch" onclick={toggleEncryption} aria-label="Toggle Encryption">
@@ -111,9 +123,11 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+		box-sizing: border-box;
 
 		width: 100%;
 		min-height: 170px;
+		padding: $padding;
 
 		background-color: $bg-0-soft;
 		cursor: pointer;
@@ -125,7 +139,19 @@
 	}
 
 	.big-text {
+		all: unset;
+		overflow: hidden;
+		display: block;
+		text-overflow: ellipsis;
+		white-space: pre-line;
+		word-wrap: break-word;
+
+		max-height: calc(3 * 1.4em);
+		width: 100%;
+		line-height: 1.4em;
+		
 		font-size: $header-size;
+		text-align: center;
 	}
 
 	.little-text {

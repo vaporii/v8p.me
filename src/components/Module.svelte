@@ -3,16 +3,14 @@
 
   let {
     text,
-    children,
-    className = ""
+    children
   }: {
     text: string;
     children: Snippet<[]>;
-    className?: string;
   } = $props();
 </script>
 
-<div class={"module-bg " + className}>
+<div class="module-bg">
   <div class="module-in">
     {@render children()}
   </div>
