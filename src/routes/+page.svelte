@@ -53,11 +53,11 @@
 		console.log(progress.total);
 	}
 
-	async function encryptFile(blob: Blob, password: string): Promise<Blob> {
+	async function encryptFile(blob: Blob, password: string, progress: (chunk: Uint8Array) => any): Promise<Blob> {
 		const encrypted = await encryptor.encrypt(
-			blob, password, (loaded, total) => {
+			blob, password, (chunk, loaded, total) => {
 				console.log(loaded / total);
-			}
+			},
 		);
 
 		console.log("encrypted.");
