@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Encryptor } from '$lib';
 	import Module from '../components/Module.svelte';
 
   const M = {
@@ -19,6 +20,8 @@
 	let dragging = $state(false);
 
 	let file: File | undefined = $state();
+	
+	const encryptor = new Encryptor();
 	
 	function toggleEncryption() {
 		encryptionEnabled = !encryptionEnabled;
@@ -50,11 +53,25 @@
 		console.log(progress.total);
 	}
 
-	function encryptFile(blob: Blob, password: string): Blob {
-		
+	async function encryptFile(blob: Blob, password: string): Promise<Blob> {
+		const encrypted = await encryptor.encrypt(
+			blob, password, (loaded, total) => {
+				console.log(loaded / total);
+			}
+		);
+
+		console.log("encrypted.");
+		return encrypted.blob;
 	}
 	
-	function uploadFile() {
+	async function uploadFile() {
+		const root = await navigator.storage.getDirectory();
+		const draftHandle = await root.getFileHandle("file_v8p.me", {create: true});
+		const file = await draftHandle.getFile();
+		const writable = await draftHandle.createWritable();
+		await writable.write("TESTA!!");
+		await writable.close();
+		
 		let blob: Blob;
 		let size: number;
 		let name: string;
@@ -76,19 +93,19 @@
 				return;
 			}
 
-			blob = encryptFile(blob, password);
+			blob = await encryptFile(blob, password);
 		}
 
-		const form = new FormData();
-		form.append("filename", fileName) // TODO: check filename and make sure it's umm longer than 0 characters
-		form.append("filesize", size.toString());
-		form.append("file", new Blob([blob]));
+		// const form = new FormData();
+		// form.append("filename", fileName) // TODO: check filename and make sure it's umm longer than 0 characters
+		// form.append("filesize", size.toString());
+		// form.append("file", new Blob([blob]));
 		
-		const xhr = new XMLHttpRequest();
-		xhr.open("POST", "/");
-		xhr.addEventListener("progress", progressEvent);
+		// const xhr = new XMLHttpRequest();
+		// xhr.open("POST", "/");
+		// xhr.addEventListener("progress", progressEvent);
 		
-		xhr.send(form);
+		// xhr.send(form);
 	}
 
 	let enterTarget: EventTarget | null; // janky fix for javascript's shitty drag and drop api
