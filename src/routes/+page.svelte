@@ -49,28 +49,26 @@
 	}
 
 	function progressEvent(progress: ProgressEvent<XMLHttpRequestEventTarget>) {
-		console.log(progress.loaded);
-		console.log(progress.total);
+		if (progress.lengthComputable) {
+			console.log(progress.loaded / progress.total);
+		}
 	}
 
-	async function encryptFile(blob: Blob, password: string, progress: (chunk: Uint8Array) => any): Promise<Blob> {
+	async function encryptFile(blob: Blob, password: string): Promise<ReadableStream<Uint8Array>> {
 		const encrypted = await encryptor.encrypt(
-			blob, password, (chunk, loaded, total) => {
+			blob, password, (loaded, total) => {
 				console.log(loaded / total);
 			},
 		);
 
-		console.log("encrypted.");
-		return encrypted.blob;
+		return encrypted.stream;
 	}
 	
 	async function uploadFile() {
 		const root = await navigator.storage.getDirectory();
 		const draftHandle = await root.getFileHandle("file_v8p.me", {create: true});
-		const file = await draftHandle.getFile();
+		// const file = await draftHandle.getFile();
 		const writable = await draftHandle.createWritable();
-		await writable.write("TESTA!!");
-		await writable.close();
 		
 		let blob: Blob;
 		let size: number;
@@ -83,29 +81,34 @@
 		} else if (text.length > 0) {
 			console.log("uploading text");
 			blob = new Blob([new TextEncoder().encode(text)]);
-			name = "text.txt"; // TODO: custom names
 			size = blob.size;
+			name = "text.txt"; // TODO: custom names
 		} else return;
 
 		if (encryptionEnabled) {
-			if (password.length < 0) {
+			if (password.length === 0) {
 				alert("password empty :("); // TODO: replace with an actual error
 				return;
 			}
 
-			blob = await encryptFile(blob, password);
+			const stream = await encryptFile(blob, password);
+			await stream.pipeTo(writable);
 		}
 
-		// const form = new FormData();
-		// form.append("filename", fileName) // TODO: check filename and make sure it's umm longer than 0 characters
-		// form.append("filesize", size.toString());
-		// form.append("file", new Blob([blob]));
+		const uploadedFile = await draftHandle.getFile();
+		console.log("got file!");
+
+		const xhr = new XMLHttpRequest();
+		xhr.upload.addEventListener("progress", progressEvent);
+
+		xhr.open("POST", "/", true);
+
+		xhr.setRequestHeader("Content-Type", "application/octet-stream");
+		xhr.setRequestHeader("X-Idk", fileName);
 		
-		// const xhr = new XMLHttpRequest();
-		// xhr.open("POST", "/");
-		// xhr.addEventListener("progress", progressEvent);
-		
-		// xhr.send(form);
+		// NOTE: progress only works properly on chrome for some reason?
+		xhr.send(uploadedFile);
+
 	}
 
 	let enterTarget: EventTarget | null; // janky fix for javascript's shitty drag and drop api
