@@ -11,6 +11,7 @@ declare global {
 			db: Database;
 			filesPath: string;
 			stmts: Statements;
+			aliasLength: number;
 		}
 		// interface PageData {}
 		// interface PageState {}

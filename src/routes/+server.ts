@@ -1,3 +1,4 @@
+import type { ClientFileInfo } from '$lib/types';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { Database } from 'better-sqlite3';
 import * as fs from 'fs';
@@ -12,6 +13,21 @@ function generateRandomString(length: number): string {
 		result += chars[array[i] % chars.length];
 	}
 	return result;
+}
+
+function processHeaders(req: Request): ClientFileInfo {
+    const fileName = req.headers.get("X-File-Name");
+    const fileType = req.headers.get("X-File-Type");
+    const encrypted = req.headers.get("X-Encrypted");
+    if (!fileName) throw new Error("X-File-Name header missing");
+    if (!fileType) throw new Error("X-File-Type header missing");
+    if (!encrypted || isNaN(Number(encrypted))) throw new Error("X-Encrypted header missing or invalid");
+
+    return {
+        fileName,
+        fileType,
+        encrypted: Number(encrypted),
+    };
 }
 
 async function writeFile(filePath: string, reader: ReadableStreamDefaultReader<Uint8Array>) {
@@ -45,7 +61,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const reader = request.body?.getReader();
 	if (!reader) return new Response(null, { status: 400 });
 
-    const db = locals.db;
+    // const db = locals.db;
 
 	const fileName = generateRandomString(50);
 	const filePath = path.join(locals.filesPath, fileName);
@@ -56,7 +72,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         console.error(e);
         return new Response("Unexpected error while writing file", { status: 500 })
     }
+
+    let clientHeaders: ClientFileInfo;
+    try {
+        clientHeaders = processHeaders(request);
+    } catch (e) {
+        throw e;
+    }
     
+    locals.stmts.insertFileInfo.run(
+        generateRandomString(locals.aliasLength),
+        clientHeaders.fileName,
+        Date.now(),
+        clientHeaders.fileType,
+        clientHeaders.encrypted,
+        filePath
+    ); // TODO: implement basic caching, load some aliases into memory instead of getting from db each time
 
 	return new Response();
 };
