@@ -76,11 +76,6 @@
 	}
 
 	async function uploadFile() {
-		const root = await navigator.storage.getDirectory();
-		const draftHandle = await root.getFileHandle('file_v8p.me', { create: true });
-		// const file = await draftHandle.getFile();
-		const writable = await draftHandle.createWritable();
-
 		let thisFile: File;
 		if (file) {
 			thisFile = file;
@@ -92,7 +87,13 @@
 		const type = thisFile.type;
 		const encrypted = encryptionEnabled;
 
+		let root: FileSystemDirectoryHandle | undefined;
+
 		if (encryptionEnabled) {
+			root = await navigator.storage.getDirectory();
+			const draftHandle = await root.getFileHandle('file_v8p.me', { create: true });
+			const writable = await draftHandle.createWritable();
+
 			if (password.length === 0) {
 				alert('password empty :('); // TODO: replace with an actual error
 				return;
@@ -112,9 +113,9 @@
 				}
 				return;
 			}
-		}
 
-		const uploadedFile = await draftHandle.getFile();
+			thisFile = await draftHandle.getFile();
+		}
 
 		const xhr = new XMLHttpRequest();
 		xhr.upload.addEventListener('progress', uploadProgressEvent);
@@ -128,17 +129,20 @@
 
 		// NOTE: progress only works properly on chrome for some reason?
 		// NOTE: maybe not
-		xhr.send(uploadedFile);
+		xhr.send(thisFile);
 
 		stopUploadOrEncrypt = async () => {
 			xhr.abort();
+			root?.removeEntry('file_v8p.me');
 		};
 
 		xhr.addEventListener('readystatechange', (e) => {
 			if (xhr.readyState === XMLHttpRequest.DONE) {
-				root.removeEntry('file_v8p.me');
+				root?.removeEntry('file_v8p.me');
 				if (xhr.status >= 200 && xhr.status < 400) {
 					buttonText = 'uploaded!';
+				} else {
+					buttonText = 'failed';
 				}
 			}
 		});

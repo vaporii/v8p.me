@@ -84,14 +84,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		throw e;
 	}
 
+    const alias = generateRandomString(locals.aliasLength);
+    
 	locals.stmts.insertFileInfo.run(
-		generateRandomString(locals.aliasLength),
+		alias,
 		clientHeaders.fileName,
 		Date.now(),
 		clientHeaders.fileType,
 		clientHeaders.encrypted,
 		filePath
 	); // TODO: implement basic caching, load some aliases into memory instead of getting from db each time
-
-	return new Response();
+    
+	return new Response(alias);
 };
