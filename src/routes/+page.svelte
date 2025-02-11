@@ -2,113 +2,109 @@
 	import { Encryptor } from '$lib';
 	import Module from '../components/Module.svelte';
 
-  const M = {
-    "B":  1,
-    "KB": 1000,
-    "MB": 1000000,
-    "GB": 1000000000,
-    "TB": 1000000000000,
-  };
+	const M = {
+		B: 1,
+		KB: 1000,
+		MB: 1000000,
+		GB: 1000000000,
+		TB: 1000000000000
+	};
 
 	let encryptionEnabled = $state(false);
-  let fileName = $state("drop file here");
-  let fileSize = $state("or, click to choose");
-  let iconSrc = $state("/icons/upload.svg");
-	let text = $state("");
-	let password = $state("");
+	let fileName = $state('drop file here');
+	let fileSize = $state('or, click to choose');
+	let iconSrc = $state('/icons/upload.svg');
+	let buttonText = $state('upload file or text');
+	let text = $state('');
+	let password = $state('');
 
 	let dragging = $state(false);
 
 	let file: File | undefined = $state();
-	
+
 	const encryptor = new Encryptor();
-	
+
 	function toggleEncryption() {
 		encryptionEnabled = !encryptionEnabled;
 	}
 
-  function handleFileChange(e: Event) {
-    const target = e.target as HTMLInputElement;
-    if (target.files && target.files.length > 0) {
-      file = target.files[0];
-      fileName = file.name;
-      fileSize = formatSize(file.size);
-      iconSrc = "/icons/file.svg";
-    }
-  }
+	function handleFileChange(e: Event) {
+		const target = e.target as HTMLInputElement;
+		if (target.files && target.files.length > 0) {
+			file = target.files[0];
+			fileName = file.name;
+			fileSize = formatSize(file.size);
+			iconSrc = '/icons/file.svg';
+		}
+	}
 
 	function cancelUpload() {
-		fileName = "drop file here";
-		fileSize = "or, click to choose";
-		iconSrc = "/icons/upload.svg";
+		fileName = 'drop file here';
+		fileSize = 'or, click to choose';
+		iconSrc = '/icons/upload.svg';
 
 		file = undefined;
-		text = "";
+		text = '';
 
 		// cancel upload process
 	}
 
-	function progressEvent(progress: ProgressEvent<XMLHttpRequestEventTarget>) {
+	function uploadProgressEvent(progress: ProgressEvent<XMLHttpRequestEventTarget>) {
 		if (progress.lengthComputable) {
-			console.log(progress.loaded / progress.total);
+			buttonText = `uploading file... ${roundToDecimal((progress.loaded / progress.total) * 100, 2)}%`;
 		}
 	}
 
 	async function encryptFile(blob: Blob, password: string): Promise<ReadableStream<Uint8Array>> {
-		const encrypted = await encryptor.encrypt(
-			blob, password, (loaded, total) => {
-				console.log(loaded / total);
-			},
-		);
+		const encrypted = await encryptor.encrypt(blob, password, (loaded, total) => {
+			buttonText = `encrypting file... ${roundToDecimal((loaded / total) * 100, 2)}%`;
+			console.log(loaded / total);
+		});
 
 		return encrypted.stream;
 	}
-	
+
 	async function uploadFile() {
 		const root = await navigator.storage.getDirectory();
-		const draftHandle = await root.getFileHandle("file_v8p.me", {create: true});
+		const draftHandle = await root.getFileHandle('file_v8p.me', { create: true });
 		// const file = await draftHandle.getFile();
 		const writable = await draftHandle.createWritable();
-		
-		let blob: Blob;
-		let size: number;
-		let name: string;
+
+		let thisFile: File;
 		if (file) {
-			console.log("uploading file");
-			blob = new Blob([file]);
-			size = file.size;
-			name = file.name;
+			thisFile = file;
 		} else if (text.length > 0) {
-			console.log("uploading text");
-			blob = new Blob([new TextEncoder().encode(text)]);
-			size = blob.size;
-			name = "text.txt"; // TODO: custom names
-		} else return;
+			thisFile = new File([new TextEncoder().encode(text)], 'text.txt', { type: 'text/plain' });
+		} else return; // TODO: error for not having file or text
+
+		const name = thisFile.name;
+		const type = thisFile.type;
+		const encrypted = encryptionEnabled;
 
 		if (encryptionEnabled) {
 			if (password.length === 0) {
-				alert("password empty :("); // TODO: replace with an actual error
+				alert('password empty :('); // TODO: replace with an actual error
 				return;
 			}
 
-			const stream = await encryptFile(blob, password);
+			const stream = await encryptFile(thisFile, password);
 			await stream.pipeTo(writable);
 		}
 
 		const uploadedFile = await draftHandle.getFile();
-		console.log("got file!");
 
 		const xhr = new XMLHttpRequest();
-		xhr.upload.addEventListener("progress", progressEvent);
+		xhr.upload.addEventListener('progress', uploadProgressEvent);
 
-		xhr.open("POST", "/", true);
+		xhr.open('POST', '/', true);
 
-		xhr.setRequestHeader("Content-Type", "application/octet-stream");
-		xhr.setRequestHeader("X-Idk", fileName);
-		
+		xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+		xhr.setRequestHeader('X-File-Name', name);
+		xhr.setRequestHeader('X-File-Type', type);
+		xhr.setRequestHeader("X-Encrypted", String(encrypted));
+
 		// NOTE: progress only works properly on chrome for some reason?
 		xhr.send(uploadedFile);
-
 	}
 
 	let enterTarget: EventTarget | null; // janky fix for javascript's shitty drag and drop api
@@ -117,12 +113,12 @@
 		dragging = false;
 
 		if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
-			if (e.dataTransfer.items[0].kind !== "file") return;
+			if (e.dataTransfer.items[0].kind !== 'file') return;
 			file = e.dataTransfer.items[0].getAsFile() as File;
 
 			fileName = file.name;
-      fileSize = formatSize(file.size);
-      iconSrc = "/icons/file.svg";
+			fileSize = formatSize(file.size);
+			iconSrc = '/icons/file.svg';
 		}
 	}
 
@@ -145,63 +141,74 @@
 		}
 	}
 
-  function formatSize(bytes: number): string {
-    let formatted = 0.0;
-    let symbol = "B";
-    
-    if (bytes < M.KB) {
-      formatted = bytes;
-      symbol = "B";
-    } else if (bytes < M.MB) {
-      formatted = bytes / M.KB;
-      symbol = "KB";
-    } else if (bytes < M.GB) {
-      formatted = bytes / M.MB;
-      symbol = "MB";
-    } else if (bytes < M.TB) {
-      formatted = bytes / M.GB;
-      symbol = "GB";
-    } else if (bytes >= M.TB) {
-      formatted = bytes / M.TB;
-      symbol = "TB";
-    }
-    
-    return (Math.round(formatted * 100) / 100) + " " + symbol;
-  }
+	function formatSize(bytes: number): string {
+		let formatted = 0.0;
+		let symbol = 'B';
+
+		if (bytes < M.KB) {
+			formatted = bytes;
+			symbol = 'B';
+		} else if (bytes < M.MB) {
+			formatted = bytes / M.KB;
+			symbol = 'KB';
+		} else if (bytes < M.GB) {
+			formatted = bytes / M.MB;
+			symbol = 'MB';
+		} else if (bytes < M.TB) {
+			formatted = bytes / M.GB;
+			symbol = 'GB';
+		} else if (bytes >= M.TB) {
+			formatted = bytes / M.TB;
+			symbol = 'TB';
+		}
+
+		return Math.round(formatted * 100) / 100 + ' ' + symbol;
+	}
+
+	function roundToDecimal(num: number, places: number): string {
+		return num.toFixed(places);
+	}
 </script>
 
 <div class="center">
 	<Module text="upload file">
 		<div class="upload-file">
-      <input type="file" name="file-upload" id="file-upload" onchange={handleFileChange} />
-      <label
+			<input type="file" name="file-upload" id="file-upload" onchange={handleFileChange} />
+			<label
 				id="file-select"
-				class={dragging ? "dragging" : ""}
+				class={dragging ? 'dragging' : ''}
 				for="file-upload"
 				ondrop={dropHandler}
 				ondragover={dragOverHandler}
 				ondragenter={dragEnterHandler}
 				ondragleave={dragLeaveHandler}
 			>
-        <img src={iconSrc} alt="upload file icon" class="upload-icon" />
-        <span class="big-text">{fileName}</span>
-        <span class="little-text">{fileSize}</span>
-      </label>
+				<img src={iconSrc} alt="upload file icon" class="upload-icon" />
+				<span class="big-text">{fileName}</span>
+				<span class="little-text">{fileSize}</span>
+			</label>
 			<div class="or-separator">
 				<span class="or-line"></span>
 				<span class="or-text">OR</span>
 				<span class="or-line"></span>
 			</div>
-			<textarea name="text" id="text" placeholder="write some text..." disabled={!!file} bind:value={text}></textarea>
+			<textarea
+				name="text"
+				id="text"
+				placeholder="write some text..."
+				disabled={!!file}
+				bind:value={text}
+			></textarea>
 			<div class="bottom-buttons">
 				<button class="cancel" onclick={cancelUpload}>cancel</button>
-				<button class="upload" onclick={uploadFile}>upload file or text</button>
+				<button class="upload" onclick={uploadFile}>{buttonText}</button>
 			</div>
 		</div>
 	</Module>
 	<Module text="options">
 		<div class="options">
-			<span class="option-label">encryption</span> <!-- NOTE: add a (?) note that tells the user it's client-side encrypted, the filename is not though -->
+			<span class="option-label">encryption</span>
+			<!-- NOTE: add a (?) note that tells the user it's client-side encrypted, the filename is not though -->
 			<button class="switch" onclick={toggleEncryption} aria-label="Toggle Encryption">
 				<div class={(encryptionEnabled ? 'switch-active ' : '') + 'switch-circle'}></div>
 			</button>
@@ -266,7 +273,7 @@
 		max-height: calc(3 * 1.4em);
 		width: 100%;
 		line-height: 1.4em;
-		
+
 		font-size: $header-size;
 		text-align: center;
 	}
@@ -277,15 +284,15 @@
 	}
 
 	#file-upload {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
+		position: absolute;
+		opacity: 0;
+		width: 0;
+		height: 0;
 	}
 
-  #file-upload:focus ~ #file-select {
-    outline: $focus-outline;
-  }
+	#file-upload:focus ~ #file-select {
+		outline: $focus-outline;
+	}
 
 	.or-separator {
 		display: flex;
