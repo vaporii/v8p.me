@@ -10,11 +10,27 @@ export interface FileInfo {
 }
 
 export interface Statements {
-	insertFileInfo: Statement<[alias: string, fileName: string, timestamp: number, fileType: string, encrypted: number, filePath: string], FileInfo>;
+	insertFileInfo: Statement<
+		[
+			alias: string,
+			fileName: string,
+			timestamp: number,
+			fileType: string,
+			encrypted: number,
+			filePath: string
+		],
+		FileInfo
+	>;
 }
 
 export interface ClientFileInfo {
-  fileName: string;
-  fileType: string;
-  encrypted: number;
+	fileName: string;
+	fileType: string;
+	encrypted: number;
+}
+
+export interface Encrypted {
+	stream: ReadableStream<Uint8Array>;
+	salt: Uint8Array;
+	cancel: () => void;
 }

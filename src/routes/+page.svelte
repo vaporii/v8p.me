@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Encryptor } from '$lib';
+	import type { Encrypted } from '$lib/types';
 	import Module from '../components/Module.svelte';
 
 	const M = {
@@ -17,12 +18,17 @@
 	let buttonText = $state('upload file or text');
 	let text = $state('');
 	let password = $state('');
+	let progressPercentage = $state(0.0);
 
 	let dragging = $state(false);
 
 	let file: File | undefined = $state();
 
 	const encryptor = new Encryptor();
+
+	// function to stop uploading or encrypting at whatever step
+	// set in encryption and uploading functions
+	let stopUploadOrEncrypt = async () => {};
 
 	function toggleEncryption() {
 		encryptionEnabled = !encryptionEnabled;
@@ -38,7 +44,7 @@
 		}
 	}
 
-	function cancelUpload() {
+	async function cancelUpload() {
 		fileName = 'drop file here';
 		fileSize = 'or, click to choose';
 		iconSrc = '/icons/upload.svg';
@@ -46,22 +52,27 @@
 		file = undefined;
 		text = '';
 
+		buttonText = 'upload file or text';
+		progressPercentage = 0;
+
 		// cancel upload process
+		await stopUploadOrEncrypt();
 	}
 
 	function uploadProgressEvent(progress: ProgressEvent<XMLHttpRequestEventTarget>) {
 		if (progress.lengthComputable) {
 			buttonText = `uploading file... ${roundToDecimal((progress.loaded / progress.total) * 100, 2)}%`;
+			progressPercentage = (progress.loaded / progress.total) * 100;
 		}
 	}
 
-	async function encryptFile(blob: Blob, password: string): Promise<ReadableStream<Uint8Array>> {
+	async function encryptFile(blob: Blob, password: string): Promise<Encrypted> {
 		const encrypted = await encryptor.encrypt(blob, password, (loaded, total) => {
 			buttonText = `encrypting file... ${roundToDecimal((loaded / total) * 100, 2)}%`;
-			console.log(loaded / total);
+			progressPercentage = (loaded / total) * 100;
 		});
 
-		return encrypted.stream;
+		return encrypted;
 	}
 
 	async function uploadFile() {
@@ -88,7 +99,19 @@
 			}
 
 			const stream = await encryptFile(thisFile, password);
-			await stream.pipeTo(writable);
+			stopUploadOrEncrypt = async () => {
+				stream.cancel();
+			};
+
+			try {
+				await stream.stream.pipeTo(writable);
+			} catch (e) {
+				if (e) {
+					alert("error encrypting file. you probably don't have enough space on your drive");
+					await cancelUpload();
+				}
+				return;
+			}
 		}
 
 		const uploadedFile = await draftHandle.getFile();
@@ -100,14 +123,29 @@
 
 		xhr.setRequestHeader('Content-Type', 'application/octet-stream');
 		xhr.setRequestHeader('X-File-Name', name);
-		xhr.setRequestHeader('X-File-Type', type);
-		xhr.setRequestHeader("X-Encrypted", String(encrypted));
+		xhr.setRequestHeader('X-File-Type', type.length === 0 ? 'text/plain' : type);
+		xhr.setRequestHeader('X-Encrypted', String(Number(encrypted)));
 
 		// NOTE: progress only works properly on chrome for some reason?
+		// NOTE: maybe not
 		xhr.send(uploadedFile);
+
+		stopUploadOrEncrypt = async () => {
+			xhr.abort();
+		};
+
+		xhr.addEventListener('readystatechange', (e) => {
+			if (xhr.readyState === XMLHttpRequest.DONE) {
+				root.removeEntry('file_v8p.me');
+				if (xhr.status >= 200 && xhr.status < 400) {
+					buttonText = 'uploaded!';
+				}
+			}
+		});
 	}
 
-	let enterTarget: EventTarget | null; // janky fix for javascript's shitty drag and drop api
+	// janky fix for javascript's shitty drag and drop api
+	let enterTarget: EventTarget | null;
 	function dropHandler(e: DragEvent) {
 		e.preventDefault();
 		dragging = false;
@@ -201,7 +239,12 @@
 			></textarea>
 			<div class="bottom-buttons">
 				<button class="cancel" onclick={cancelUpload}>cancel</button>
-				<button class="upload" onclick={uploadFile}>{buttonText}</button>
+				<button class="upload" onclick={uploadFile}>
+					<div class="back-text">{buttonText}</div>
+					<div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
+						{buttonText}
+					</div>
+				</button>
 			</div>
 		</div>
 	</Module>
@@ -235,6 +278,10 @@
 		padding-top: $top-padding;
 
 		background-color: $bg-0;
+	}
+
+	.upload-file {
+		position: relative;
 	}
 
 	#file-select {
@@ -331,6 +378,42 @@
 
 	.bottom-buttons button {
 		flex-grow: 1;
+	}
+
+	.upload {
+		position: relative;
+	}
+
+	.loading-bar {
+		position: absolute;
+		background-color: $accent;
+		height: 100%;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+	}
+
+	.back-text {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 100%;
+		height: 100%;
+		background-color: $accent;
+		color: $bg;
+	}
+
+	.front-text {
+		position: absolute;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		background-color: $bg-0-soft;
+		clip-path: inset(0 0 0 50%);
 	}
 
 	.options {
