@@ -29,20 +29,21 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.filesPath = process.env.FILES_DIR;
 	}
 
-  if (!event.locals.aliasLength) {
-    if (!process.env.ALIAS_LENGTH) {
-      // throw new Error('ALIAS_LENGTH environment variable not defined');
-      event.locals.aliasLength = 6;
-    } else {
-      event.locals.aliasLength = Number(process.env.ALIAS_LENGTH);
-    }
-  }
+	if (!event.locals.aliasLength) {
+		if (!process.env.ALIAS_LENGTH) {
+			// throw new Error('ALIAS_LENGTH environment variable not defined');
+			event.locals.aliasLength = 6;
+		} else {
+			event.locals.aliasLength = Number(process.env.ALIAS_LENGTH);
+		}
+	}
 
 	if (!event.locals.stmts) {
 		event.locals.stmts = {
 			insertFileInfo: event.locals.db.prepare(
 				'INSERT INTO files(alias, fileName, timestamp, fileType, encrypted, filePath) VALUES(?, ?, ?, ?, ?, ?)'
-			)
+			),
+			getFileInfo: event.locals.db.prepare('SELECT * FROM files WHERE alias=?')
 		};
 	}
 

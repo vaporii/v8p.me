@@ -19,8 +19,9 @@ export interface Statements {
 			encrypted: number,
 			filePath: string
 		],
-		FileInfo
+		void
 	>;
+	getFileInfo: Statement<[alias: string], FileInfo>;
 }
 
 export interface ClientFileInfo {
