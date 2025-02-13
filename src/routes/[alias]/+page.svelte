@@ -32,7 +32,7 @@
 				<div class="filename">{data.fileName}</div>
 				<div class="info">{formatSize(data.fileSize)} • {data.fileType}</div>
 			</div>
-			<a href="/" class="download-icon">
+			<a href={data.alias + "/direct"} download={data.fileName} class="download-icon">
 				<img src="/icons/download.svg" alt="download icon" srcset="" />
 			</a>
 		</div>

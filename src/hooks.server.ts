@@ -17,7 +17,8 @@ export const handle: Handle = async ({ event, resolve }) => {
                     timestamp INTEGER NOT NULL,
                     fileType TEXT NOT NULL,
                     encrypted INTEGER NOT NULL,
-                    filePath TEXT NOT NULL UNIQUE
+                    filePath TEXT NOT NULL UNIQUE,
+										fileSize INTEGER NOT NULL
                   )`;
 		db.exec(query);
 	}
@@ -41,7 +42,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (!event.locals.stmts) {
 		event.locals.stmts = {
 			insertFileInfo: event.locals.db.prepare(
-				'INSERT INTO files(alias, fileName, timestamp, fileType, encrypted, filePath) VALUES(?, ?, ?, ?, ?, ?)'
+				'INSERT INTO files(alias, fileName, timestamp, fileType, encrypted, filePath, fileSize) VALUES(?, ?, ?, ?, ?, ?, ?)'
 			),
 			getFileInfo: event.locals.db.prepare('SELECT * FROM files WHERE alias=?')
 		};
