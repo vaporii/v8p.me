@@ -92,7 +92,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		Date.now(),
 		clientHeaders.fileType,
 		clientHeaders.encrypted,
-		filePath
+		filePath,
+		
 	); // TODO: implement basic caching, load some aliases into memory instead of getting from db each time
     
 	return new Response(alias);

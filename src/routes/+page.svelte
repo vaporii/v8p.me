@@ -1,15 +1,8 @@
 <script lang="ts">
-	import { Encryptor } from '$lib';
+	import { goto } from '$app/navigation';
+	import { Encryptor, formatSize } from '$lib';
 	import type { Encrypted } from '$lib/types';
 	import Module from '../components/Module.svelte';
-
-	const M = {
-		B: 1,
-		KB: 1000,
-		MB: 1000000,
-		GB: 1000000000,
-		TB: 1000000000000
-	};
 
 	let encryptionEnabled = $state(false);
 	let fileName = $state('drop file here');
@@ -141,6 +134,7 @@
 				root?.removeEntry('file_v8p.me');
 				if (xhr.status >= 200 && xhr.status < 400) {
 					buttonText = 'uploaded!';
+					goto(xhr.responseText);
 				} else {
 					buttonText = 'failed';
 				}
@@ -181,30 +175,6 @@
 			e.preventDefault();
 			dragging = false;
 		}
-	}
-
-	function formatSize(bytes: number): string {
-		let formatted = 0.0;
-		let symbol = 'B';
-
-		if (bytes < M.KB) {
-			formatted = bytes;
-			symbol = 'B';
-		} else if (bytes < M.MB) {
-			formatted = bytes / M.KB;
-			symbol = 'KB';
-		} else if (bytes < M.GB) {
-			formatted = bytes / M.MB;
-			symbol = 'MB';
-		} else if (bytes < M.TB) {
-			formatted = bytes / M.GB;
-			symbol = 'GB';
-		} else if (bytes >= M.TB) {
-			formatted = bytes / M.TB;
-			symbol = 'TB';
-		}
-
-		return Math.round(formatted * 100) / 100 + ' ' + symbol;
 	}
 
 	function roundToDecimal(num: number, places: number): string {

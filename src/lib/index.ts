@@ -1,4 +1,4 @@
-import type { Encrypted } from "./types";
+import type { Encrypted } from './types';
 
 export class Encryptor {
 	private readonly iterations = 100000;
@@ -15,16 +15,16 @@ export class Encryptor {
 		const key = await this.deriveKey(password, salt, this.iterations);
 		let offset = 0;
 
-    let cancel = () => {};
-    
+		let cancel = () => {};
+
 		const total = size + Math.ceil(size / this.chunkSize) * 12;
 
 		const stream = new ReadableStream<Uint8Array>({
-      async start(controller) {
-        cancel = () => {
-          controller.error();
-        };
-      },
+			async start(controller) {
+				cancel = () => {
+					controller.error();
+				};
+			},
 			async pull(controller) {
 				const chunk = blob.slice(offset, offset + chunkSize);
 				const chunkArrayBuffer = await chunk.arrayBuffer();
@@ -76,4 +76,36 @@ export class Encryptor {
 
 		return derivedKey;
 	}
+}
+
+const M = {
+	B: 1,
+	KB: 1000,
+	MB: 1000000,
+	GB: 1000000000,
+	TB: 1000000000000
+};
+
+export function formatSize(bytes: number): string {
+	let formatted = 0.0;
+	let symbol = 'B';
+
+	if (bytes < M.KB) {
+		formatted = bytes;
+		symbol = 'B';
+	} else if (bytes < M.MB) {
+		formatted = bytes / M.KB;
+		symbol = 'KB';
+	} else if (bytes < M.GB) {
+		formatted = bytes / M.MB;
+		symbol = 'MB';
+	} else if (bytes < M.TB) {
+		formatted = bytes / M.GB;
+		symbol = 'GB';
+	} else if (bytes >= M.TB) {
+		formatted = bytes / M.TB;
+		symbol = 'TB';
+	}
+
+	return Math.round(formatted * 100) / 100 + ' ' + symbol;
 }

@@ -7,6 +7,7 @@ export interface FileInfo {
 	fileType: string;
 	encrypted: number;
 	filePath: string;
+	fileSize: number;
 }
 
 export interface Statements {
@@ -17,7 +18,8 @@ export interface Statements {
 			timestamp: number,
 			fileType: string,
 			encrypted: number,
-			filePath: string
+			filePath: string,
+			fileSize: number
 		],
 		void
 	>;
