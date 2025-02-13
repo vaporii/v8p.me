@@ -5,12 +5,25 @@
 </script>
 
 <div class="center">
-  <div>[guest@server /]$ cd ~{path}</div>
-  <div>bash: cd: /home/server{path}: <span class="strong">No such file or directory</span></div>
-  <div>[guest@server /]$ help</div>
-  <div><span class="strong">alias not found. maybe turn it off and back on?</span></div>
-  <div>[guest@server /]$ <span class="cursor">&nbsp;</span></div>
-  <div class="spacer"></div>
+  <div class="left">
+    <h1>404</h1>
+    <h2>page not found</h2>
+    <div class="terminal">
+      <div>[guest@v8p /]$ cd ~{path}</div>
+      <div>bash: cd: /home/v8p{path}: <span class="strong">No such file or directory</span></div>
+      <div>[guest@v8p /]$ cd ~</div>
+      <div><a class="strong" href="/">→ return home</a></div>
+      <div>[guest@v8p /]$ <span class="cursor">&nbsp;</span></div>
+    </div>
+  </div>
+  <div class="right">
+    <pre>
+        ╱|、
+      (˚ˎ 。7  
+       |、˜〵          
+       じしˍ,)ノ
+    </pre>
+  </div>
 </div>
 
 <style lang="scss">
@@ -21,17 +34,49 @@
     color: $fg-3;
     position: absolute;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    min-height: 300px;
-    min-width: 300px;
-    max-width: 800px;
-    width: 60vw;
+    left: 10vw;
+    right: 10vw;
+    transform: translate(0%, -50%);
+    font-size: 20px;
+
+    display: flex;
+  }
+
+  .right {
+    margin-left: auto;
+  }
+
+  pre {
+    font-weight: 1000;
+    font-size: 40px;
+    line-height: 1.4em;
+  }
+  
+  @media screen and (max-width: 1000px) {
+    .right {
+      display: none;
+    }
+  }
+
+  h1 {
+    font-size: 70px;
+    color: $fg;
+  }
+
+  h2 {
+    font-size: 60px;
+    color: $fg-3;
+    margin: 0;
+    margin-bottom: 50px;
   }
 
   .strong {
     color: $fg;
     font-weight: bold;
+  }
+
+  a {
+    color: $accent !important;
   }
   
   .cursor {
@@ -48,9 +93,5 @@
     to {
       opacity: 0;
     }
-  }
-
-  .spacer {
-    height: 200px;
   }
 </style>

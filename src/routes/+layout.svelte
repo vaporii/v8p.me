@@ -1,5 +1,5 @@
 <script lang="ts">
-	import "@fontsource-variable/jetbrains-mono";
+	import "@fontsource/jetbrains-mono";
 	import '../app.scss';
 
 	let { children } = $props();
