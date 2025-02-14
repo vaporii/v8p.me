@@ -26,20 +26,28 @@
 </script>
 
 <div class="center">
-	<Module text="file">
-		<div class="wrapper">
-			<div>
-				<div class="filename">{data.fileName}</div>
-				<div class="info">{formatSize(data.fileSize)} • {data.fileType}</div>
+	<Module text={data.encrypted ? "password protected" : "file"}>
+		{#if data.encrypted}
+			<input type="password" name="password" id="password">
+			<div class="bottom">
+				<div>decrypted files are never seen by the server</div>
+				<button class="upload">decrypt file</button>
 			</div>
-			<a href={data.alias + "/direct"} download={data.fileName} class="download-icon">
-				<img src="/icons/download.svg" alt="download icon" srcset="" />
-			</a>
-		</div>
-		<div class="separator"></div>
-		<div class="date">
-			uploaded <span class="strong">{date.day}</span> at <span class="strong">{date.time}</span>
-		</div>
+		{:else}
+			<div class="wrapper">
+				<div>
+					<div class="filename">{data.fileName}</div>
+					<div class="info">{formatSize(data.fileSize)} • {data.fileType}</div>
+				</div>
+				<a href={data.alias + '/direct'} download={data.fileName} class="download-icon">
+					<img src="/icons/download.svg" alt="download icon" srcset="" />
+				</a>
+			</div>
+			<div class="separator"></div>
+			<div class="date">
+				uploaded <span class="strong">{date.day}</span> at <span class="strong">{date.time}</span>
+			</div>
+		{/if}
 	</Module>
 </div>
 
@@ -53,6 +61,8 @@
 		transform: translate(-50%, -50%);
 		background-color: $bg-0;
 		padding-bottom: $padding;
+		max-width: 100vw;
+		width: $module-width;
 	}
 
 	.wrapper {
@@ -75,6 +85,7 @@
 	.download-icon {
 		height: 40px;
 		align-self: center;
+		margin-left: auto;
 	}
 
 	.download-icon img {
@@ -94,5 +105,12 @@
 
 	.strong {
 		font-weight: bold;
+	}
+
+	.bottom {
+		display: flex;
+	}
+
+	button {
 	}
 </style>
