@@ -16,7 +16,9 @@ h1 {
 button {
   all: unset;
   background-color: $bg-0-soft;
-  height: 44px;
+  // height: 44px;
+  padding-top: $small-padding;
+  padding-bottom: $small-padding;
   box-sizing: border-box;
   cursor: pointer;
   text-align: center;

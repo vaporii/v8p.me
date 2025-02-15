@@ -23,15 +23,30 @@
 	}
 
 	const date = convertDate(data.timestamp);
+	
+	function handleKeypress(e: KeyboardEvent) {
+		if (e.key !== "Enter") return;
+		button?.click();
+	}
+
+	function decryptPress() {
+
+	}
+
+	function decryptFile() {
+		
+	}
+	
+	let button: HTMLButtonElement | undefined = $state();
 </script>
 
 <div class="center">
 	<Module text={data.encrypted ? "password protected" : "file"}>
 		{#if data.encrypted}
-			<input type="password" name="password" id="password">
+			<input type="password" name="password" id="password" onkeypress={handleKeypress}>
 			<div class="bottom">
-				<div>decrypted files are never seen by the server</div>
-				<button class="upload">decrypt file</button>
+				<div class="text">the server never sees decrypted files</div>
+				<button class="upload" bind:this={button} onclick={decryptPress}>decrypt file</button>
 			</div>
 		{:else}
 			<div class="wrapper">
@@ -111,6 +126,19 @@
 		display: flex;
 	}
 
+	#password {
+		margin-bottom: $padding;
+		margin-top: $smaller-padding;
+	}
+	
+	.text {
+		font-size: $small-font-size;
+		color: $fg-1;
+		align-self: center;
+	}
+	
 	button {
+		margin-left: auto;
+		width: 300px;
 	}
 </style>

@@ -13,15 +13,15 @@
       <div>bash: cd: /home/v8p{path}: <span class="strong">No such file or directory</span></div>
       <div>[guest@v8p /]$ cd ~</div>
       <div><a class="strong" href="/">→ return home</a></div>
-      <div>[guest@v8p /]$ <span class="cursor">&nbsp;</span></div>
+      <div>[guest@v8p ~]$ <span class="cursor">&nbsp;</span></div>
     </div>
   </div>
   <div class="right">
     <pre>
-        ╱|、
-      (˚ˎ 。7  
-       |、˜〵          
-       じしˍ,)ノ
+  ╱|、
+(˚ˎ 。7
+ |、˜〵
+ じしˍ,)ノ
     </pre>
   </div>
 </div>
