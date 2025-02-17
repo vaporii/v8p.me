@@ -7,6 +7,9 @@
 	let buttonText = $state('decrypt file');
 	let progressPercentage = $state(0);
 
+	let downloadLink = $state(`/${data.alias}/direct`);
+	let showDecryptScreen = $state(Boolean(data.encrypted));
+
 	const encryptor = new Encryptor();
 
 	function convertDate(inputDate: number) {
@@ -68,26 +71,23 @@
 		const f = await fetch(`/${data.alias}/direct`);
 		const stream = f.body;
 		if (!stream) {
-			buttonText = "failed";
+			buttonText = 'failed';
 			return;
 		}
-		
-		console.log("decrypting..");
+
 		const decrypted = await encryptor.decryptStream(stream, password);
-		console.log("created decrpakjen");
 
 		try {
-			console.log("piping");
 			await decrypted.stream.pipeTo(writable);
 		} catch (e) {
-			console.log("error decrypting");
 			console.log(e);
 		}
 
-		console.log("done piping");
-		
 		const file = await draftHandle.getFile();
-		console.log(await file.text());
+		const url = URL.createObjectURL(file);
+
+		downloadLink = url;
+		showDecryptScreen = false;
 
 		// const xhr = new XMLHttpRequest();
 		// xhr.responseType = 'blob';
@@ -100,7 +100,7 @@
 		// 		if (xhr.status >= 200 && xhr.status < 400) {
 		// 			const stream = await decryptFile(xhr.response, thisPassword);
 		// 			console.log(xhr.response.size);
-					
+
 		// 			try {
 		// 				await stream.stream.pipeTo(writable);
 		// 			} catch (e) {
@@ -128,7 +128,7 @@
 
 <div class="center">
 	<Module text={data.encrypted ? 'password protected' : 'file'}>
-		{#if data.encrypted}
+		{#if showDecryptScreen}
 			<input
 				type="password"
 				name="password"
@@ -151,7 +151,7 @@
 					<div class="filename">{data.fileName}</div>
 					<div class="info">{formatSize(data.fileSize)} • {data.fileType}</div>
 				</div>
-				<a href={data.alias + '/direct'} download={data.fileName} class="download-icon">
+				<a href={downloadLink} download={data.fileName} class="download-icon">
 					<img src="/icons/download.svg" alt="download icon" srcset="" />
 				</a>
 			</div>

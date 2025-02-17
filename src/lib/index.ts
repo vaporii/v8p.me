@@ -58,7 +58,6 @@ export class Encryptor {
 	): Promise<Encrypted> {
 		const ts = this;
 		const saltSize = this.saltSize;
-		// full encrypted chunk size for a full plaintext chunk
 		const fullChunkSize = this.chunkSize + 12 + 16;
 
 		const reader = readStream.getReader();
@@ -75,55 +74,42 @@ export class Encryptor {
 		const stream = new ReadableStream<Uint8Array>({
 			async pull(controller) {
 				const { value, done } = await reader.read();
-				if (done) {
-					controller.close();
-					return;
+				if (value) {
+					const merged = new Uint8Array(running.length + value.length);
+					merged.set(running);
+					merged.set(value, running.length);
+					running = merged;
 				}
 
-				const merged = new Uint8Array(running.length + value.length);
-				merged.set(running);
-				merged.set(value, running.length);
-				running = merged;
-
 				if (!saltSet && running.length >= saltSize) {
-					console.log('setting salt');
 					salt = running.slice(0, saltSize);
 					key = await ts.deriveKey(password, salt, ts.iterations);
 					running = running.slice(saltSize);
 					saltSet = true;
-					console.log('set salt!');
 				} else if (!saltSet) {
-					console.log('salt not set');
 					controller.enqueue(new Uint8Array(0));
 					return;
 				}
 
-				if (running.length < fullChunkSize) {
-					controller.enqueue(new Uint8Array(0));
-					return;
-				}
-
-				// process full chunks while we have enough data or if stream is done, process remaining
-				while (running.length >= fullChunkSize) {
-					console.log('processing chunk...');
+				// process as many chunks as possible
+				// if done, process any chunk that has at least minimal size (iv + tag)
+				// otherwise only process full chunks
+				while (done ? running.length >= 12 + 16 : running.length >= fullChunkSize) {
 					let currentChunk: Uint8Array;
 					if (running.length >= fullChunkSize) {
 						currentChunk = running.slice(0, fullChunkSize);
 						running = running.slice(fullChunkSize);
 					} else {
-						// final chunk may be smaller than fullChunkSize
+						// final chunk can be smaller than fullChunkSize
 						currentChunk = running;
 						running = new Uint8Array(0);
 					}
-
-					// iv and tag
 					if (currentChunk.length < 12 + 16) {
 						controller.error(
 							new Error('invalid chunk size, too small to contain iv and authentication tag')
 						);
 						return;
 					}
-
 					const iv = currentChunk.slice(0, 12);
 					const ciphertext = currentChunk.slice(12);
 					try {
@@ -142,7 +128,15 @@ export class Encryptor {
 					}
 				}
 
-				console.log('processed chunk!');
+				if (done) {
+					if (running.length > 0) {
+						controller.error(new Error('incomplete final chunk'));
+					} else {
+						controller.close();
+					}
+				} else {
+					controller.enqueue(new Uint8Array(0));
+				}
 			},
 			async cancel(reason) {
 				reader.cancel(reason);
