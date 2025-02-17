@@ -85,6 +85,9 @@
 		}
 
 		console.log("done piping");
+		
+		const file = await draftHandle.getFile();
+		console.log(await file.text());
 
 		// const xhr = new XMLHttpRequest();
 		// xhr.responseType = 'blob';

@@ -75,25 +75,37 @@ export class Encryptor {
 		const stream = new ReadableStream<Uint8Array>({
 			async pull(controller) {
 				const { value, done } = await reader.read();
-				if (value) {
-					const merged = new Uint8Array(running.length + value.length);
-					merged.set(running);
-					merged.set(value, running.length);
-					running = merged;
+				if (done) {
+					controller.close();
+					return;
 				}
 
+				const merged = new Uint8Array(running.length + value.length);
+				merged.set(running);
+				merged.set(value, running.length);
+				running = merged;
+
 				if (!saltSet && running.length >= saltSize) {
+					console.log('setting salt');
 					salt = running.slice(0, saltSize);
 					key = await ts.deriveKey(password, salt, ts.iterations);
 					running = running.slice(saltSize);
 					saltSet = true;
+					console.log('set salt!');
 				} else if (!saltSet) {
+					console.log('salt not set');
 					controller.enqueue(new Uint8Array(0));
 					return;
-				};
+				}
+
+				if (running.length < fullChunkSize) {
+					controller.enqueue(new Uint8Array(0));
+					return;
+				}
 
 				// process full chunks while we have enough data or if stream is done, process remaining
-				while (running.length >= fullChunkSize || (done && running.length > 0)) {
+				while (running.length >= fullChunkSize) {
+					console.log('processing chunk...');
 					let currentChunk: Uint8Array;
 					if (running.length >= fullChunkSize) {
 						currentChunk = running.slice(0, fullChunkSize);
@@ -130,9 +142,7 @@ export class Encryptor {
 					}
 				}
 
-				if (done) {
-					controller.close();
-				}
+				console.log('processed chunk!');
 			},
 			async cancel(reason) {
 				reader.cancel(reason);
