@@ -1,7 +1,13 @@
 <script lang="ts">
-	import { formatSize } from '$lib';
+	import { Encryptor, formatSize, roundToDecimal } from '$lib';
 	import Module from '../../components/Module.svelte';
 	let { data } = $props();
+
+	let password = $state('');
+	let buttonText = $state('decrypt file');
+	let progressPercentage = $state(0);
+
+	const encryptor = new Encryptor();
 
 	function convertDate(inputDate: number) {
 		const date = new Date(inputDate);
@@ -23,30 +29,118 @@
 	}
 
 	const date = convertDate(data.timestamp);
-	
+
 	function handleKeypress(e: KeyboardEvent) {
-		if (e.key !== "Enter") return;
+		if (e.key !== 'Enter') return;
 		button?.click();
 	}
 
-	function decryptPress() {
-
+	function downloadProgressEvent(progress: ProgressEvent<XMLHttpRequestEventTarget>) {
+		if (progress.lengthComputable) {
+			progressPercentage = (progress.loaded / progress.total) * 100;
+			buttonText = `downloading... ${roundToDecimal(progressPercentage, 2)}%`;
+		}
 	}
 
-	function decryptFile() {
+	async function decryptFile(blob: Blob, password: string) {
+		const decrypted = await encryptor.decrypt(blob, password, (loaded, total) => {
+			progressPercentage = (loaded / total) * 100;
+			buttonText = `decrypting... ${roundToDecimal(progressPercentage, 2)}%`;
+		});
+
+		return decrypted;
+	}
+
+	// TODO: add some form of other encryption so you have to have the
+	// password to retrieve the encrypted file from the server
+	async function clickDecrypt() {
+		if (password.length === 0) {
+			return; // TODO: maybe replace with an error?
+		}
+
+		// user can't change it after clicking btn
+		const thisPassword = password;
+
+		const root = await navigator.storage.getDirectory();
+		const draftHandle = await root.getFileHandle('file_v8p.me', { create: true });
+		const writable = await draftHandle.createWritable();
+
+		const f = await fetch(`/${data.alias}/direct`);
+		const stream = f.body;
+		if (!stream) {
+			buttonText = "failed";
+			return;
+		}
 		
+		console.log("decrypting..");
+		const decrypted = await encryptor.decryptStream(stream, password);
+		console.log("created decrpakjen");
+
+		try {
+			console.log("piping");
+			await decrypted.stream.pipeTo(writable);
+		} catch (e) {
+			console.log("error decrypting");
+			console.log(e);
+		}
+
+		console.log("done piping");
+
+		// const xhr = new XMLHttpRequest();
+		// xhr.responseType = 'blob';
+		// xhr.open('GET', `/${data.alias}/direct`);
+
+		// xhr.addEventListener('progress', downloadProgressEvent);
+
+		// xhr.addEventListener('loadstart', async (e) => {
+		// 	// if (xhr.readyState === XMLHttpRequest.DONE) {
+		// 		if (xhr.status >= 200 && xhr.status < 400) {
+		// 			const stream = await decryptFile(xhr.response, thisPassword);
+		// 			console.log(xhr.response.size);
+					
+		// 			try {
+		// 				await stream.stream.pipeTo(writable);
+		// 			} catch (e) {
+		// 				if (e) {
+		// 					// nope, because incorrect password likely.
+		// 					// TODO: determine between this and wrong pw
+		// 					console.log(e);
+		// 					alert("error decrypting file. you probably don't have enough space on your drive");
+		// 				}
+		// 				return;
+		// 			}
+
+		// 			// console.log(await (await draftHandle.getFile()).text());
+		// 		} else {
+		// 			buttonText = 'failed';
+		// 		}
+		// 	// }
+		// });
+
+		// xhr.send();
 	}
-	
+
 	let button: HTMLButtonElement | undefined = $state();
 </script>
 
 <div class="center">
-	<Module text={data.encrypted ? "password protected" : "file"}>
+	<Module text={data.encrypted ? 'password protected' : 'file'}>
 		{#if data.encrypted}
-			<input type="password" name="password" id="password" onkeypress={handleKeypress}>
+			<input
+				type="password"
+				name="password"
+				id="password"
+				onkeypress={handleKeypress}
+				bind:value={password}
+			/>
 			<div class="bottom">
 				<div class="text">the server never sees decrypted files</div>
-				<button class="upload" bind:this={button} onclick={decryptPress}>decrypt file</button>
+				<button class="upload" onclick={clickDecrypt}>
+					<div class="back-text">{buttonText}</div>
+					<div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
+						{buttonText}
+					</div>
+				</button>
 			</div>
 		{:else}
 			<div class="wrapper">
@@ -130,15 +224,39 @@
 		margin-bottom: $padding;
 		margin-top: $smaller-padding;
 	}
-	
+
 	.text {
 		font-size: $small-font-size;
 		color: $fg-1;
 		align-self: center;
 	}
-	
-	button {
+
+	.upload {
 		margin-left: auto;
 		width: 300px;
+		position: relative;
+	}
+
+	.back-text {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 100%;
+		height: 100%;
+		background-color: $accent;
+		color: $bg;
+	}
+
+	.front-text {
+		position: absolute;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		background-color: $bg-0-soft;
+		clip-path: inset(0 0 0 50%);
 	}
 </style>

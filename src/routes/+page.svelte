@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Encryptor, formatSize } from '$lib';
+	import { Encryptor, formatSize, roundToDecimal } from '$lib';
 	import type { Encrypted } from '$lib/types';
 	import Module from '../components/Module.svelte';
 
@@ -54,8 +54,8 @@
 
 	function uploadProgressEvent(progress: ProgressEvent<XMLHttpRequestEventTarget>) {
 		if (progress.lengthComputable) {
-			buttonText = `uploading file... ${roundToDecimal((progress.loaded / progress.total) * 100, 2)}%`;
 			progressPercentage = (progress.loaded / progress.total) * 100;
+			buttonText = `uploading file... ${roundToDecimal(progressPercentage, 2)}%`;
 		}
 	}
 
@@ -83,14 +83,14 @@
 		let root: FileSystemDirectoryHandle | undefined;
 
 		if (encryptionEnabled) {
-			root = await navigator.storage.getDirectory();
-			const draftHandle = await root.getFileHandle('file_v8p.me', { create: true });
-			const writable = await draftHandle.createWritable();
-
 			if (password.length === 0) {
 				alert('password empty :('); // TODO: replace with an actual error
 				return;
 			}
+
+			root = await navigator.storage.getDirectory();
+			const draftHandle = await root.getFileHandle('file_v8p.me', { create: true });
+			const writable = await draftHandle.createWritable();
 
 			const stream = await encryptFile(thisFile, password);
 			stopUploadOrEncrypt = async () => {
@@ -175,10 +175,6 @@
 			e.preventDefault();
 			dragging = false;
 		}
-	}
-
-	function roundToDecimal(num: number, places: number): string {
-		return num.toFixed(places);
 	}
 </script>
 

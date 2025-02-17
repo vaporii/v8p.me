@@ -34,6 +34,5 @@ export interface ClientFileInfo {
 
 export interface Encrypted {
 	stream: ReadableStream<Uint8Array>;
-	salt: Uint8Array;
 	cancel: () => void;
 }
