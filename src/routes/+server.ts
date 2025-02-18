@@ -87,7 +87,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const alias = generateRandomString(locals.aliasLength);
 
 	let size: number;
-
 	try {
 		size = fs.statSync(filePath, { throwIfNoEntry: true }).size;
 	} catch (e) {
