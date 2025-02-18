@@ -174,3 +174,15 @@ export function formatSize(bytes: number): string {
 export function roundToDecimal(num: number, places: number): string {
 	return num.toFixed(places);
 }
+
+export async function tryRemoveFileEntry(
+	root: FileSystemDirectoryHandle,
+	entry: string
+): Promise<boolean> {
+	try {
+		await root.removeEntry(entry);
+		return true;
+	} catch {
+		return false;
+	}
+}

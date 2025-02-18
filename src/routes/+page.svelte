@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Encryptor, formatSize, roundToDecimal } from '$lib';
+	import { Encryptor, formatSize, roundToDecimal, tryRemoveFileEntry } from '$lib';
 	import type { Encrypted } from '$lib/types';
 	import Module from '../components/Module.svelte';
 
@@ -69,6 +69,8 @@
 	}
 
 	async function uploadFile() {
+		buttonText = "starting...";
+		
 		let thisFile: File;
 		if (file) {
 			thisFile = file;
@@ -89,6 +91,8 @@
 			}
 
 			root = await navigator.storage.getDirectory();
+			await tryRemoveFileEntry(root, 'file_v8p.me');
+
 			const draftHandle = await root.getFileHandle('file_v8p.me', { create: true });
 			const writable = await draftHandle.createWritable();
 

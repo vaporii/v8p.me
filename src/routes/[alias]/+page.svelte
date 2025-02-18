@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Encryptor, formatSize, roundToDecimal } from '$lib';
+	import { Encryptor, formatSize, roundToDecimal, tryRemoveFileEntry } from '$lib';
 	import Module from '../../components/Module.svelte';
 	let { data } = $props();
 
@@ -65,8 +65,18 @@
 		const thisPassword = password;
 
 		const root = await navigator.storage.getDirectory();
+		await tryRemoveFileEntry(root, 'file_v8p.me');
 		const draftHandle = await root.getFileHandle('file_v8p.me', { create: true });
-		const writable = await draftHandle.createWritable();
+		let writable = await draftHandle.createWritable();
+
+		buttonText = 'waiting for storage...';
+		const isPersist = await navigator.storage.persist();
+		// TODO: make this an actual error (see figma design sheet)
+		if (!isPersist) {
+			alert(
+				'persistent storage could not be enabled. some large files may not load properly or entirely'
+			);
+		}
 
 		const f = await fetch(`/${data.alias}/direct`);
 		const stream = f.body;
@@ -76,55 +86,49 @@
 			return;
 		}
 
-		await stream.pipeTo(writable);
+		let loaded = 0;
+		const progressStream = new TransformStream({
+			start(controller) {},
+			transform(chunk, controller) {
+				loaded += chunk.byteLength;
+				progressPercentage = (loaded / data.fileSize) * 100;
+				buttonText = `downloading... ${roundToDecimal(progressPercentage, 2)}%`;
+				controller.enqueue(chunk);
+			}
+		});
+
+		try {
+			await stream.pipeThrough(progressStream).pipeTo(writable);
+		} catch (e) {
+			progressPercentage = 0;
+			buttonText = 'failed';
+			await tryRemoveFileEntry(root, 'file_v8p.me');
+			console.error(e);
+			return;
+		}
 
 		const file = await draftHandle.getFile();
 		const encrypted = await encryptor.decrypt(file, password, (loaded, total) => {
-			console.log(loaded / total);
+			progressPercentage = (loaded / total) * 100;
+			buttonText = `decrypting... ${roundToDecimal(progressPercentage, 2)}%`;
 		});
 
-		const draftHandle1 = await root.getFileHandle('file1_v8p.me', { create: true });
-		const writable1 = await draftHandle1.createWritable();
+		writable = await draftHandle.createWritable();
 
-		await encrypted.stream.pipeTo(writable1);
-		
-		const url = URL.createObjectURL(await draftHandle1.getFile());
+		try {
+			await encrypted.stream.pipeTo(writable);
+		} catch (e) {
+			progressPercentage = 0;
+			buttonText = 'failed';
+			await tryRemoveFileEntry(root, 'file_v8p.me');
+			console.error(e);
+			return;
+		}
+
+		const url = URL.createObjectURL(await draftHandle.getFile());
 
 		downloadLink = url;
 		showDecryptScreen = false;
-
-		// const xhr = new XMLHttpRequest();
-		// xhr.responseType = 'blob';
-		// xhr.open('GET', `/${data.alias}/direct`);
-
-		// xhr.addEventListener('progress', downloadProgressEvent);
-
-		// xhr.addEventListener('loadstart', async (e) => {
-		// 	// if (xhr.readyState === XMLHttpRequest.DONE) {
-		// 		if (xhr.status >= 200 && xhr.status < 400) {
-		// 			const stream = await decryptFile(xhr.response, thisPassword);
-		// 			console.log(xhr.response.size);
-
-		// 			try {
-		// 				await stream.stream.pipeTo(writable);
-		// 			} catch (e) {
-		// 				if (e) {
-		// 					// nope, because incorrect password likely.
-		// 					// TODO: determine between this and wrong pw
-		// 					console.log(e);
-		// 					alert("error decrypting file. you probably don't have enough space on your drive");
-		// 				}
-		// 				return;
-		// 			}
-
-		// 			// console.log(await (await draftHandle.getFile()).text());
-		// 		} else {
-		// 			buttonText = 'failed';
-		// 		}
-		// 	// }
-		// });
-
-		// xhr.send();
 	}
 
 	let button: HTMLButtonElement | undefined = $state();
