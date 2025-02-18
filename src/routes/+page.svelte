@@ -70,6 +70,14 @@
 
 	async function uploadFile() {
 		buttonText = "starting...";
+
+		const isPersist = await navigator.storage.persist();
+		// TODO: make this an actual error (see figma design sheet)
+		if (!isPersist) {
+			alert(
+				'persistent storage could not be enabled. some large files may not load properly or entirely'
+			);
+		}
 		
 		let thisFile: File;
 		if (file) {

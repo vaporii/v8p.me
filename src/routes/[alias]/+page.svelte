@@ -78,8 +78,8 @@
 			);
 		}
 
-		const f = await fetch(`/${data.alias}/direct`);
-		const stream = f.body;
+		const req = await fetch(`/${data.alias}/direct`);
+		const stream = req.body;
 		if (!stream) {
 			buttonText = 'failed';
 			console.error('stream was somehow not present in the request');
@@ -108,7 +108,7 @@
 		}
 
 		const file = await draftHandle.getFile();
-		const encrypted = await encryptor.decrypt(file, password, (loaded, total) => {
+		const encrypted = await encryptor.decrypt(file, thisPassword, (loaded, total) => {
 			progressPercentage = (loaded / total) * 100;
 			buttonText = `decrypting... ${roundToDecimal(progressPercentage, 2)}%`;
 		});
