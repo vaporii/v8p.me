@@ -51,99 +51,154 @@ export class Encryptor {
 		return { stream, cancel };
 	}
 
-	public async decryptStream(
+	// public async decryptStream(
+	// 	readStream: ReadableStream<Uint8Array>,
+	// 	password: string,
+	// 	progress?: (loaded: number) => any
+	// ): Promise<Encrypted> {
+	// 	const ts = this;
+	// 	const saltSize = this.saltSize;
+	// 	const fullChunkSize = this.chunkSize + 12 + 16;
+
+	// 	const reader = readStream.getReader();
+	// 	let running = new Uint8Array(0);
+	// 	let salt: Uint8Array;
+	// 	let saltSet = false;
+	// 	let key: CryptoKey;
+	// 	let decryptedBytes = 0;
+
+	// 	let cancel = () => {
+	// 		reader.cancel();
+	// 	};
+
+	// 	const stream = new ReadableStream<Uint8Array>({
+	// 		async pull(controller) {
+	// 			const { value, done } = await reader.read();
+	// 			if (value) {
+	// 				const merged = new Uint8Array(running.length + value.length);
+	// 				merged.set(running);
+	// 				merged.set(value, running.length);
+	// 				running = merged;
+	// 			}
+
+	// 			if (!saltSet && running.length >= saltSize) {
+	// 				salt = running.slice(0, saltSize);
+	// 				key = await ts.deriveKey(password, salt, ts.iterations);
+	// 				running = running.slice(saltSize);
+	// 				saltSet = true;
+	// 			} else if (!saltSet) {
+	// 				controller.enqueue(new Uint8Array(0));
+	// 				return;
+	// 			}
+
+	// 			// process as many chunks as possible
+	// 			// if done, process any chunk that has at least minimal size (iv + tag)
+	// 			// otherwise only process full chunks
+	// 			while (done ? running.length >= 12 + 16 : running.length >= fullChunkSize) {
+	// 				let currentChunk: Uint8Array;
+	// 				if (running.length >= fullChunkSize) {
+	// 					currentChunk = running.slice(0, fullChunkSize);
+	// 					running = running.slice(fullChunkSize);
+	// 				} else {
+	// 					// final chunk can be smaller than fullChunkSize
+	// 					currentChunk = running;
+	// 					running = new Uint8Array(0);
+	// 				}
+	// 				if (currentChunk.length < 12 + 16) {
+	// 					controller.error(
+	// 						new Error('invalid chunk size, too small to contain iv and authentication tag')
+	// 					);
+	// 					return;
+	// 				}
+	// 				const iv = currentChunk.slice(0, 12);
+	// 				const ciphertext = currentChunk.slice(12);
+	// 				try {
+	// 					const decryptedBuffer = await window.crypto.subtle.decrypt(
+	// 						{ name: 'AES-GCM', iv },
+	// 						key,
+	// 						ciphertext
+	// 					);
+	// 					const decryptedChunk = new Uint8Array(decryptedBuffer);
+	// 					decryptedBytes += decryptedChunk.length;
+	// 					progress && progress(decryptedBytes);
+	// 					controller.enqueue(decryptedChunk);
+	// 				} catch (e) {
+	// 					controller.error(e);
+	// 					return;
+	// 				}
+	// 			}
+
+	// 			if (done) {
+	// 				if (running.length > 0) {
+	// 					controller.error(new Error('incomplete final chunk'));
+	// 				} else {
+	// 					controller.close();
+	// 				}
+	// 			} else {
+	// 				controller.enqueue(new Uint8Array(0));
+	// 			}
+	// 		},
+	// 		async cancel(reason) {
+	// 			reader.cancel(reason);
+	// 		}
+	// 	});
+
+	// 	return { stream, cancel };
+	// }
+
+	public async decryptStream1(
 		readStream: ReadableStream<Uint8Array>,
 		password: string,
+		writable: FileSystemWritableFileStream,
 		progress?: (loaded: number) => any
-	): Promise<Encrypted> {
-		const ts = this;
-		const saltSize = this.saltSize;
-		const fullChunkSize = this.chunkSize + 12 + 16;
-
+	) {
 		const reader = readStream.getReader();
+		let complete = 0;
+
+		// add iv and AES-GCM annotation sizes
+		const chunkSize = this.chunkSize + 12 + 16;
+
+		let salt: Uint8Array | undefined;
+		let key: CryptoKey | undefined;
+
 		let running = new Uint8Array(0);
-		let salt: Uint8Array;
-		let saltSet = false;
-		let key: CryptoKey;
-		let decryptedBytes = 0;
-
-		let cancel = () => {
-			reader.cancel();
-		};
-
-		const stream = new ReadableStream<Uint8Array>({
-			async pull(controller) {
-				const { value, done } = await reader.read();
-				if (value) {
-					const merged = new Uint8Array(running.length + value.length);
-					merged.set(running);
-					merged.set(value, running.length);
-					running = merged;
-				}
-
-				if (!saltSet && running.length >= saltSize) {
-					salt = running.slice(0, saltSize);
-					key = await ts.deriveKey(password, salt, ts.iterations);
-					running = running.slice(saltSize);
-					saltSet = true;
-				} else if (!saltSet) {
-					controller.enqueue(new Uint8Array(0));
-					return;
-				}
-
-				// process as many chunks as possible
-				// if done, process any chunk that has at least minimal size (iv + tag)
-				// otherwise only process full chunks
-				while (done ? running.length >= 12 + 16 : running.length >= fullChunkSize) {
-					let currentChunk: Uint8Array;
-					if (running.length >= fullChunkSize) {
-						currentChunk = running.slice(0, fullChunkSize);
-						running = running.slice(fullChunkSize);
-					} else {
-						// final chunk can be smaller than fullChunkSize
-						currentChunk = running;
-						running = new Uint8Array(0);
-					}
-					if (currentChunk.length < 12 + 16) {
-						controller.error(
-							new Error('invalid chunk size, too small to contain iv and authentication tag')
-						);
-						return;
-					}
-					const iv = currentChunk.slice(0, 12);
-					const ciphertext = currentChunk.slice(12);
-					try {
-						const decryptedBuffer = await window.crypto.subtle.decrypt(
-							{ name: 'AES-GCM', iv },
-							key,
-							ciphertext
-						);
-						const decryptedChunk = new Uint8Array(decryptedBuffer);
-						decryptedBytes += decryptedChunk.length;
-						progress && progress(decryptedBytes);
-						controller.enqueue(decryptedChunk);
-					} catch (e) {
-						controller.error(e);
-						return;
-					}
-				}
-
-				if (done) {
-					if (running.length > 0) {
-						controller.error(new Error('incomplete final chunk'));
-					} else {
-						controller.close();
-					}
-				} else {
-					controller.enqueue(new Uint8Array(0));
-				}
-			},
-			async cancel(reason) {
-				reader.cancel(reason);
+		while (true) {
+			const { value, done } = await reader.read();
+			if (done) {
+				break;
 			}
-		});
 
-		return { stream, cancel };
+			complete += value.length;
+
+			const merged = new Uint8Array(running.length + value.length);
+			merged.set(running);
+			merged.set(value, running.length);
+			running = merged;
+
+			if (!salt) {
+				salt = value.slice(0, this.saltSize);
+				key = await this.deriveKey(password, salt, this.iterations);
+				running = running.slice(this.saltSize);
+			}
+
+			if (!key) return; // ts :(
+
+			while (running.length > chunkSize) {
+				const chunk = running.slice(0, chunkSize);
+				const iv = chunk.slice(0, 12);
+				const ciphertext = chunk.slice(12);
+				const decryptedBuffer = await window.crypto.subtle.decrypt(
+					{ name: 'AES-GCM', iv },
+					key,
+					ciphertext
+				);
+				await writable.write(decryptedBuffer);
+				running = running.slice(chunkSize);
+			}
+
+			console.log("givig progoress");
+			progress && progress(complete);
+		}
 	}
 
 	public async decrypt(
@@ -177,11 +232,19 @@ export class Encryptor {
 				const iv = chunkArrayBuffer.slice(0, 12);
 				const ciphertext = chunkArrayBuffer.slice(12);
 				try {
-					const decryptedBuffer = await window.crypto.subtle.decrypt(
-						{ name: 'AES-GCM', iv },
-						key,
-						ciphertext
-					);
+					let decryptedBuffer: ArrayBuffer;
+					try {
+						decryptedBuffer = await window.crypto.subtle.decrypt(
+							{ name: 'AES-GCM', iv },
+							key,
+							ciphertext
+						);
+					} catch (e) {
+						console.error("error decrypting");
+						console.error(e);
+						throw e;
+					}
+					
 					offset += chunkSize;
 					controller.enqueue(new Uint8Array(decryptedBuffer));
 					progress && progress(Math.min(offset, total) - saltSize, total - saltSize);

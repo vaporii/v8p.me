@@ -72,21 +72,25 @@
 		const stream = f.body;
 		if (!stream) {
 			buttonText = 'failed';
+			console.error('stream was somehow not present in the request');
 			return;
 		}
 
-		const decrypted = await encryptor.decryptStream(stream, password);
-
-		try {
-			await decrypted.stream.pipeTo(writable);
-		} catch (e) {
-			console.log(e);
-		}
+		await stream.pipeTo(writable);
 
 		const file = await draftHandle.getFile();
-		const url = URL.createObjectURL(file);
+		const encrypted = await encryptor.decrypt(file, password, (loaded, total) => {
+			console.log(loaded / total);
+		});
 
-		downloadLink = url;
+		const draftHandle1 = await root.getFileHandle('file1_v8p.me', { create: true });
+		const writable1 = await draftHandle1.createWritable();
+
+		await encrypted.stream.pipeTo(writable1);
+		
+		// const url = URL.createObjectURL(file);
+
+		// downloadLink = url;
 		showDecryptScreen = false;
 
 		// const xhr = new XMLHttpRequest();
