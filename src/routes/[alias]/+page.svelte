@@ -88,9 +88,9 @@
 
 		await encrypted.stream.pipeTo(writable1);
 		
-		// const url = URL.createObjectURL(file);
+		const url = URL.createObjectURL(await draftHandle1.getFile());
 
-		// downloadLink = url;
+		downloadLink = url;
 		showDecryptScreen = false;
 
 		// const xhr = new XMLHttpRequest();
