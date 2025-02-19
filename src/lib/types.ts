@@ -29,6 +29,7 @@ export interface Statements {
 export interface ClientFileInfo {
 	fileName: string;
 	fileType: string;
+	fileSize: number;
 	encrypted: number;
 }
 

@@ -18,15 +18,19 @@ function generateRandomString(length: number): string {
 function processHeaders(req: Request): ClientFileInfo {
 	const fileName = req.headers.get('X-File-Name');
 	const fileType = req.headers.get('X-File-Type');
+	const fileSize = req.headers.get('X-File-Size');
 	const encrypted = req.headers.get('X-Encrypted');
 	if (!fileName) throw new Error('X-File-Name header missing');
 	if (!fileType) throw new Error('X-File-Type header missing');
+	if (!fileSize || isNaN(Number(fileSize)))
+		throw new Error('X-File-Size header missing or invalid');
 	if (!encrypted || isNaN(Number(encrypted)))
 		throw new Error('X-Encrypted header missing or invalid');
 
 	return {
 		fileName,
 		fileType,
+		fileSize: Number(fileSize),
 		encrypted: Number(encrypted)
 	};
 }
@@ -86,13 +90,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	const alias = generateRandomString(locals.aliasLength);
 
-	let size: number;
-	try {
-		size = fs.statSync(filePath, { throwIfNoEntry: true }).size;
-	} catch (e) {
-		return new Response('something went wrong', { status: 500 });
-	}
-
 	locals.stmts.insertFileInfo.run(
 		alias,
 		clientHeaders.fileName,
@@ -100,7 +97,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		clientHeaders.fileType,
 		clientHeaders.encrypted,
 		filePath,
-		size
+		clientHeaders.fileSize,
 	); // TODO: implement basic caching, load some aliases into memory instead of getting from db each time
 
 	return new Response(alias);

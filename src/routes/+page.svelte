@@ -81,6 +81,7 @@
 
 		const name = thisFile.name;
 		const type = thisFile.type;
+		const size = thisFile.size;
 		const encrypted = encryptionEnabled;
 
 		let root: FileSystemDirectoryHandle | undefined;
@@ -130,6 +131,7 @@
 		xhr.setRequestHeader('Content-Type', 'application/octet-stream');
 		xhr.setRequestHeader('X-File-Name', name);
 		xhr.setRequestHeader('X-File-Type', type.length === 0 ? 'text/plain' : type);
+		xhr.setRequestHeader('X-File-Size', size.toString());
 		xhr.setRequestHeader('X-Encrypted', String(Number(encrypted)));
 
 		// NOTE: progress only works properly on chrome for some reason?

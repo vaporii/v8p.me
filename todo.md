@@ -2,6 +2,6 @@
 - [ ] ~~write a privacy policy because of ^ :(~~ *not anymore; this may be on the back-backlog if needed eventually, though*
 - [ ] ~~switch to mebibytes~~ *eventually maybe*
 - [x] don't let the user click encrypt or decrypt buttons more than once
-- [ ] fix filesize on encrypted file info screen
+- [x] fix filesize on encrypted file info screen
 - [ ] let user decrypt by pressing enter on pw input
 - [ ] other keyboard shortcuts, ctrl+enter on main page will upload
