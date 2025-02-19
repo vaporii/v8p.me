@@ -106,6 +106,7 @@
 				await stream.stream.pipeTo(writable);
 			} catch (e) {
 				if (e) {
+					console.error(e);
 					alert("error encrypting file. you probably don't have enough space on your drive"); // TODO: replace with an actual error
 					await cancelUpload();
 				}
