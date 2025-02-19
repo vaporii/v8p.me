@@ -1,0 +1,3 @@
+- [ ] store ip addresses for complying with legal requests
+- [ ] write a privacy policy because of ^ :(
+- [ ] switch to mebibytes
