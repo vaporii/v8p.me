@@ -186,3 +186,18 @@ export async function tryRemoveFileEntry(
 		return false;
 	}
 }
+
+export async function requestPersistentStorage() {
+	if (!(await navigator.storage.persist())) {
+		alert(
+			'persistent storage could not be enabled. some large files may not load properly or entirely'
+		); // TODO: replace this with an actual error (see figma design sheet)
+	}
+}
+
+export async function persistIfNeeded(size: number) {
+	const quota = (await navigator.storage.estimate()).quota;
+	if (!quota || size * 2 > quota) {
+		await requestPersistentStorage();
+	}
+}

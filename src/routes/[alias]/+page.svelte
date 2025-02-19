@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Encryptor, formatSize, roundToDecimal, tryRemoveFileEntry } from '$lib';
+	import { Encryptor, formatSize, persistIfNeeded, roundToDecimal, tryRemoveFileEntry } from '$lib';
 	import Module from '../../components/Module.svelte';
 	let { data } = $props();
 
@@ -70,13 +70,7 @@
 		let writable = await draftHandle.createWritable();
 
 		buttonText = 'waiting for storage...';
-		const isPersist = await navigator.storage.persist();
-		// TODO: make this an actual error (see figma design sheet)
-		if (!isPersist) {
-			alert(
-				'persistent storage could not be enabled. some large files may not load properly or entirely'
-			);
-		}
+		await persistIfNeeded(data.fileSize);
 
 		const req = await fetch(`/${data.alias}/direct`);
 		const stream = req.body;

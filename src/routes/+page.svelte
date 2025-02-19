@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Encryptor, formatSize, roundToDecimal, tryRemoveFileEntry } from '$lib';
+	import { Encryptor, formatSize, persistIfNeeded, roundToDecimal, tryRemoveFileEntry } from '$lib';
 	import type { Encrypted } from '$lib/types';
 	import Module from '../components/Module.svelte';
 
@@ -48,7 +48,6 @@
 		buttonText = 'upload file or text';
 		progressPercentage = 0;
 
-		// cancel upload process
 		await stopUploadOrEncrypt();
 	}
 
@@ -69,16 +68,8 @@
 	}
 
 	async function uploadFile() {
-		buttonText = "starting...";
+		buttonText = 'starting...';
 
-		const isPersist = await navigator.storage.persist();
-		// TODO: make this an actual error (see figma design sheet)
-		if (!isPersist) {
-			alert(
-				'persistent storage could not be enabled. some large files may not load properly or entirely'
-			);
-		}
-		
 		let thisFile: File;
 		if (file) {
 			thisFile = file;
@@ -91,6 +82,8 @@
 		const encrypted = encryptionEnabled;
 
 		let root: FileSystemDirectoryHandle | undefined;
+
+		await persistIfNeeded(thisFile.size);
 
 		if (encryptionEnabled) {
 			if (password.length === 0) {
@@ -113,7 +106,7 @@
 				await stream.stream.pipeTo(writable);
 			} catch (e) {
 				if (e) {
-					alert("error encrypting file. you probably don't have enough space on your drive");
+					alert("error encrypting file. you probably don't have enough space on your drive"); // TODO: replace with an actual error
 					await cancelUpload();
 				}
 				return;
