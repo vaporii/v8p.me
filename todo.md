@@ -1,3 +1,3 @@
-- [ ] store ip addresses for complying with legal requests
-- [ ] write a privacy policy because of ^ :(
+- [ ] ~~store ip addresses for complying with legal requests~~
+- [ ] ~~write a privacy policy because of ^ :(~~ *not anymore; this may be on the back-backlog if needed eventually, though*
 - [ ] switch to mebibytes
