@@ -6,3 +6,4 @@ a basic file uploading service featuring client-side encryption and decryption u
 - [ ] display basic file information (file size, etc) on encrypted file page
 - [ ] expiration dates
 - [ ] file linking to save server space
+- [ ] option to only use ram (it has one of those (?) things after it that explains that it will speed it up, but it should only be used for smaller files)
