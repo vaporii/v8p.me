@@ -10,6 +10,8 @@
 	let downloadLink = $state(`/${data.alias}/direct`);
 	let showDecryptScreen = $state(Boolean(data.encrypted));
 
+	let root: FileSystemDirectoryHandle;
+
 	const encryptor = new Encryptor();
 
 	function convertDate(inputDate: number) {
@@ -64,7 +66,7 @@
 		// user can't change it after clicking btn
 		const thisPassword = password;
 
-		const root = await navigator.storage.getDirectory();
+		root = await navigator.storage.getDirectory();
 		await tryRemoveFileEntry(root, 'file_v8p.me');
 		const draftHandle = await root.getFileHandle('file_v8p.me', { create: true });
 		let writable = await draftHandle.createWritable();
@@ -125,8 +127,14 @@
 		showDecryptScreen = false;
 	}
 
+	function beforeUnload(e: BeforeUnloadEvent) {
+		tryRemoveFileEntry(root, "file_v8p.me");
+	}
+
 	let button: HTMLButtonElement | undefined = $state();
 </script>
+
+<svelte:window on:beforeunload={beforeUnload}/>
 
 <div class="center">
 	<Module text={data.encrypted ? 'password protected' : 'file'}>
