@@ -1,3 +1,4 @@
 - [ ] ~~store ip addresses for complying with legal requests~~
 - [ ] ~~write a privacy policy because of ^ :(~~ *not anymore; this may be on the back-backlog if needed eventually, though*
 - [ ] switch to mebibytes
+- [ ] don't let the user click encrypt or decrypt buttons more than once
