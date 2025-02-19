@@ -4,7 +4,7 @@
   const path = page.url.pathname;
 </script>
 
-<div class="center">
+<div class="wrapper">
   <div class="left">
     <h1>404</h1>
     <h2>page not found</h2>
@@ -29,7 +29,7 @@
 <style lang="scss">
   @use "../vars" as *;
   
-  .center {
+  .wrapper {
     padding-bottom: $padding;
     color: $fg-3;
     position: absolute;
