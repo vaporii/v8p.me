@@ -23,6 +23,17 @@ body {
   background-color: $bg-0;
 }
 
+select {
+  outline: none;
+  border-radius: 0;
+  border: none;
+  font: inherit;
+  color: inherit;
+  background-color: $bg-0-soft;
+  height: 44px;
+  border: $module-border solid $fg-1;
+}
+
 h1 {
   font-size: $header-size;
   margin: 0;
