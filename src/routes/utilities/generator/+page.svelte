@@ -14,14 +14,16 @@
 		const writable = await draftHandle.createWritable();
 
 		let complete = 0;
-		const chunkSize = 64 * 1024; // 64 KiB (max crypto.getRandomValues size)
+		const chunkSize = 2 * 1024 * 1024; // 2 MiB
 		const stream = new ReadableStream({
 			async pull(controller) {
-				controller.enqueue(
-					crypto.getRandomValues(new Uint8Array(Math.min(chunkSize, size - complete)))
-				);
+				const len = Math.min(chunkSize, size - complete);
+				const arr = new Uint8Array(len);
+				// for (let i = 0; i < len; i++) {
+				// 	arr[i] = Math.floor(Math.random() * 256);
+				// }
+				controller.enqueue(arr);
 				complete += chunkSize;
-
 				progress = `generating... ${roundToDecimal((Math.min(size, complete) / size) * 100, 2)}%`;
 
 				if (complete >= size) controller.close();
