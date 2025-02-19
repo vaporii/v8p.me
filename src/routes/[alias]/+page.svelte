@@ -40,22 +40,6 @@
 		button?.click();
 	}
 
-	function downloadProgressEvent(progress: ProgressEvent<XMLHttpRequestEventTarget>) {
-		if (progress.lengthComputable) {
-			progressPercentage = (progress.loaded / progress.total) * 100;
-			buttonText = `downloading... ${roundToDecimal(progressPercentage, 2)}%`;
-		}
-	}
-
-	async function decryptFile(blob: Blob, password: string) {
-		const decrypted = await encryptor.decrypt(blob, password, (loaded, total) => {
-			progressPercentage = (loaded / total) * 100;
-			buttonText = `decrypting... ${roundToDecimal(progressPercentage, 2)}%`;
-		});
-
-		return decrypted;
-	}
-
 	// TODO: add some form of other encryption so you have to have the
 	// password to retrieve the encrypted file from the server
 	async function clickDecrypt() {
@@ -128,13 +112,13 @@
 	}
 
 	function beforeUnload(e: BeforeUnloadEvent) {
-		tryRemoveFileEntry(root, "file_v8p.me");
+		tryRemoveFileEntry(root, 'file_v8p.me');
 	}
 
 	let button: HTMLButtonElement | undefined = $state();
 </script>
 
-<svelte:window on:beforeunload={beforeUnload}/>
+<svelte:window on:beforeunload={beforeUnload} />
 
 <div class="center">
 	<Module text={data.encrypted ? 'password protected' : 'file'}>
