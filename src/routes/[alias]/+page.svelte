@@ -3,6 +3,8 @@
 	import Module from '../../components/Module.svelte';
 	let { data } = $props();
 
+	let buttonDisabled = $state(false);
+
 	let password = $state('');
 	let buttonText = $state('decrypt file');
 	let progressPercentage = $state(0);
@@ -38,6 +40,12 @@
 	function handleKeypress(e: KeyboardEvent) {
 		if (e.key !== 'Enter') return;
 		button?.click();
+	}
+
+	async function decryptPress() {
+		buttonDisabled = true;
+		await clickDecrypt();
+		buttonDisabled = false;
 	}
 
 	// TODO: add some form of other encryption so you have to have the
@@ -132,7 +140,7 @@
 			/>
 			<div class="bottom">
 				<div class="text">the server never sees decrypted files</div>
-				<button class="upload" onclick={clickDecrypt}>
+				<button class="upload" onclick={decryptPress} disabled={buttonDisabled}>
 					<div class="back-text">{buttonText}</div>
 					<div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
 						{buttonText}

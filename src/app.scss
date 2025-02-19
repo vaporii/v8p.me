@@ -50,6 +50,10 @@ button {
   text-align: center;
 }
 
+button:disabled {
+  opacity: $disabled-opacity;
+}
+
 button:focus {
   outline: $focus-outline;
 }
