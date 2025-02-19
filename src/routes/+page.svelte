@@ -4,6 +4,8 @@
 	import type { Encrypted } from '$lib/types';
 	import Module from '../components/Module.svelte';
 
+	let buttonDisabled = $state(false);
+
 	let encryptionEnabled = $state(false);
 	let fileName = $state('drop file here');
 	let fileSize = $state('or, click to choose');
@@ -38,6 +40,8 @@
 	}
 
 	async function cancelUpload() {
+		await stopUploadOrEncrypt();
+
 		fileName = 'drop file here';
 		fileSize = 'or, click to choose';
 		iconSrc = '/icons/upload.svg';
@@ -48,7 +52,7 @@
 		buttonText = 'upload file or text';
 		progressPercentage = 0;
 
-		await stopUploadOrEncrypt();
+		buttonDisabled = false;
 	}
 
 	function uploadProgressEvent(progress: ProgressEvent<XMLHttpRequestEventTarget>) {
@@ -68,8 +72,6 @@
 	}
 
 	async function uploadFile() {
-		buttonText = 'starting...';
-
 		let thisFile: File;
 		if (file) {
 			thisFile = file;
@@ -83,11 +85,15 @@
 
 		let root: FileSystemDirectoryHandle | undefined;
 
+		buttonDisabled = true;
+		buttonText = 'starting...';
+
 		await persistIfNeeded(thisFile.size);
 
 		if (encryptionEnabled) {
 			if (password.length === 0) {
 				alert('password empty :('); // TODO: replace with an actual error
+				await cancelUpload();
 				return;
 			}
 
@@ -108,8 +114,8 @@
 				if (e) {
 					console.error(e);
 					alert("error encrypting file. you probably don't have enough space on your drive"); // TODO: replace with an actual error
-					await cancelUpload();
 				}
+				await cancelUpload();
 				return;
 			}
 
@@ -215,7 +221,7 @@
 			></textarea>
 			<div class="bottom-buttons">
 				<button class="cancel" onclick={cancelUpload}>cancel</button>
-				<button class="upload" onclick={uploadFile}>
+				<button class="upload" onclick={uploadFile} disabled={buttonDisabled}>
 					<div class="back-text">{buttonText}</div>
 					<div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
 						{buttonText}
