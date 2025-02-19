@@ -240,21 +240,6 @@
 <style lang="scss">
 	@use '../vars' as *;
 
-	.center {
-		position: absolute;
-
-		min-width: 320px;
-		max-width: 480px;
-		width: 100%;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		padding-bottom: $padding;
-		padding-top: $top-padding;
-
-		background-color: $bg-0;
-	}
-
 	.upload-file {
 		position: relative;
 	}

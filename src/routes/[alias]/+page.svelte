@@ -168,17 +168,6 @@
 <style lang="scss">
 	@use '../../vars' as *;
 
-	.center {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		background-color: $bg-0;
-		padding-bottom: $padding;
-		max-width: 100vw;
-		width: $module-width;
-	}
-
 	.wrapper {
 		display: flex;
 		gap: $padding;
