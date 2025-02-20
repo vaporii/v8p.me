@@ -11,3 +11,4 @@
 - [ ] option to just use RAM for large files (has a (?) that explains that it will speed it up, but it should only be used for smaller files)
 - [ ] expiration dates
 - [ ] file linking to save server space
+- [ ] make readme better
