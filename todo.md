@@ -4,7 +4,7 @@
 - [x] don't let the user click encrypt or decrypt buttons more than once
 - [x] fix filesize on encrypted file info screen
 - [x] let user decrypt by pressing enter on pw input
-- [ ] other keyboard shortcuts, ctrl+enter on main page will upload
+- [x] other keyboard shortcuts, ctrl+enter on main page will upload
 - [ ] file display on file screen
 - [ ] (?) things on encryption,
 - [ ] actual error screens (no password, persistent storage alert)
