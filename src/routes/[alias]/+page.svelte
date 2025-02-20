@@ -39,6 +39,7 @@
 
 	function handleKeypress(e: KeyboardEvent) {
 		if (e.key !== 'Enter') return;
+		console.log("click");
 		button?.click();
 	}
 
@@ -140,7 +141,7 @@
 			/>
 			<div class="bottom">
 				<div class="text">the server never sees decrypted files</div>
-				<button class="upload" onclick={decryptPress} disabled={buttonDisabled}>
+				<button class="upload" onclick={decryptPress} disabled={buttonDisabled} bind:this={button}>
 					<div class="back-text">{buttonText}</div>
 					<div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
 						{buttonText}
