@@ -1,5 +1,13 @@
 <script lang="ts">
-	import { Encryptor, formatSize, persistIfNeeded, roundToDecimal, tryRemoveFileEntry } from '$lib';
+	import {
+		Encryptor,
+		formatSize,
+		isDisplayable,
+		persistIfNeeded,
+		roundToDecimal,
+		tryRemoveFileEntry
+	} from '$lib';
+	import FileDisplay from '../../components/FileDisplay.svelte';
 	import Module from '../../components/Module.svelte';
 	let { data } = $props();
 
@@ -39,7 +47,7 @@
 
 	function handleKeypress(e: KeyboardEvent) {
 		if (e.key !== 'Enter') return;
-		console.log("click");
+		console.log('click');
 		button?.click();
 	}
 
@@ -129,7 +137,7 @@
 
 <svelte:window on:beforeunload={beforeUnload} />
 
-<div class="center">
+<div class="center" style={isDisplayable(data.fileName) ? 'max-width: 100%' : ''}>
 	<Module text={data.encrypted ? 'password protected' : 'file'}>
 		{#if showDecryptScreen}
 			<input
@@ -159,6 +167,9 @@
 				</a>
 			</div>
 			<div class="separator"></div>
+			<FileDisplay fileInfo={data} url={downloadLink}>
+				<div class="separator"></div>
+			</FileDisplay>
 			<div class="date">
 				uploaded <span class="strong">{date.day}</span> at <span class="strong">{date.time}</span>
 			</div>

@@ -201,3 +201,12 @@ export async function persistIfNeeded(size: number) {
 		await requestPersistentStorage();
 	}
 }
+
+export function isDisplayable(fileName: string): boolean {
+	const exts = ['ts', 'js', 'html', 'c', 'zig', 'xml', 'json', 'md', 'rtf', 'txt', 'svelte'];
+
+	const split = fileName.split('.');
+	const ext = split[split.length - 1];
+
+	return exts.includes(ext);
+}
