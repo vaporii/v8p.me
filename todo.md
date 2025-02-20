@@ -6,3 +6,8 @@
 - [x] let user decrypt by pressing enter on pw input
 - [ ] other keyboard shortcuts, ctrl+enter on main page will upload
 - [ ] file display on file screen
+- [ ] (?) things on encryption,
+- [ ] actual error screens (no password, persistent storage alert)
+- [ ] option to just use RAM for large files (has a (?) that explains that it will speed it up, but it should only be used for smaller files)
+- [ ] expiration dates
+- [ ] file linking to save server space
