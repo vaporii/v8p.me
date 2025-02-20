@@ -12,3 +12,4 @@
 - [ ] expiration dates
 - [ ] file linking to save server space
 - [ ] make readme better
+- [ ] allow changing filename for text or like changing the language or something
