@@ -190,7 +190,18 @@
 			dragging = false;
 		}
 	}
+
+	function handleKeyDown(e: KeyboardEvent) {
+		if (e.ctrlKey && e.key === 'Enter') {
+			e.preventDefault();
+			uploadFile();
+		}
+	}
+
+	
 </script>
+
+<svelte:window onkeypress={handleKeyDown} />
 
 <div class="center">
 	<Module text="upload file">
