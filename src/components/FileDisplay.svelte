@@ -48,8 +48,10 @@
 		<track kind="captions" />
 		your browser doesn't support this video type :(
 	</video>
-{:else if language}
-	<Text {text} language={language.lang}></Text>
+{:else if type === 'image'}
+	<img src={url} alt={fileInfo.fileName}>
+{:else if language || type === 'text'}
+	<Text {text} language={language?.lang || langs.plaintext}></Text>
 {/if}
 
 {@render children()}

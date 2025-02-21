@@ -137,7 +137,12 @@
 
 <svelte:window on:beforeunload={beforeUnload} />
 
-<div class={'center' + (isDisplayable(data.fileName) ? ' display' : '')}>
+<div
+	class={'center' +
+		((isDisplayable(data.fileName) && !showDecryptScreen) || data.fileType.startsWith('text/')
+			? ' display'
+			: '')}
+>
 	<Module text={data.encrypted ? 'password protected' : 'file'}>
 		{#if showDecryptScreen}
 			<input
@@ -183,7 +188,7 @@
 	.display {
 		max-width: calc(100% - $padding * 2);
 	}
-	
+
 	.wrapper {
 		display: flex;
 		gap: $padding;
