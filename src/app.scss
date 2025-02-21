@@ -61,6 +61,21 @@ button.upload {
   border: $module-border solid $fg-1;
 }
 
+button.old {
+  background-color: transparent;
+  height: unset;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+button.old.cancel {
+  color: $fg-1;
+}
+
+button.old.submit {
+  color: $fg;
+}
+
 ::placeholder {
   color: $bg-4;
   opacity: 1;

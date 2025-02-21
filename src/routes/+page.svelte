@@ -4,6 +4,7 @@
 	import type { Encrypted } from '$lib/types';
 	import Module from '../components/Module.svelte';
 	import Help from '../components/Help.svelte';
+	import Popup from '../components/Popup.svelte';
 
 	let buttonDisabled = $state(false);
 
@@ -15,6 +16,9 @@
 	let text = $state('');
 	let password = $state('');
 	let progressPercentage = $state(0.0);
+
+	let popupText = $state('');
+	let displayingPopup = $state(false);
 
 	let dragging = $state(false);
 
@@ -40,20 +44,26 @@
 		}
 	}
 
-	async function cancelUpload() {
+	async function cancelUpload(removeFile?: boolean) {
 		await stopUploadOrEncrypt();
 
-		fileName = 'drop file here';
-		fileSize = 'or, click to choose';
-		iconSrc = '/icons/upload.svg';
+		if (removeFile) {
+			fileName = 'drop file here';
+			fileSize = 'or, click to choose';
+			iconSrc = '/icons/upload.svg';
 
-		file = undefined;
-		text = '';
+			file = undefined;
+			text = '';
+		}
 
 		buttonText = 'upload file or text';
 		progressPercentage = 0;
 
 		buttonDisabled = false;
+	}
+
+	function cancelUploadButton() {
+		cancelUpload(true);
 	}
 
 	function uploadProgressEvent(progress: ProgressEvent<XMLHttpRequestEventTarget>) {
@@ -90,14 +100,16 @@
 		buttonDisabled = true;
 		buttonText = 'starting...';
 
-		await persistIfNeeded(thisFile.size);
-
 		if (encryptionEnabled) {
 			if (password.length === 0) {
-				alert('password empty :('); // TODO: replace with an actual error
+				popupText = 'password empty :(';
+				displayingPopup = true;
+
 				await cancelUpload();
 				return;
 			}
+
+			await persistIfNeeded(thisFile.size);
 
 			root = await navigator.storage.getDirectory();
 			await tryRemoveFileEntry(root, 'file_v8p.me');
@@ -122,6 +134,8 @@
 			}
 
 			thisFile = await draftHandle.getFile();
+		} else {
+			await persistIfNeeded(thisFile.size);
 		}
 
 		const xhr = new XMLHttpRequest();
@@ -192,15 +206,23 @@
 		}
 	}
 
-	function handleKeyDown(e: KeyboardEvent) {
+	let acknowledge: () => any = $state(() => {});
+
+	function handleKeyUp(e: KeyboardEvent) {
 		if (e.ctrlKey && e.key === 'Enter') {
+			e.stopImmediatePropagation();
+			e.stopPropagation();
 			e.preventDefault();
 			uploadFile();
+		}
+		if (e.key === 'Escape') {
+			e.preventDefault();
+			acknowledge();
 		}
 	}
 </script>
 
-<svelte:window onkeypress={handleKeyDown} />
+<svelte:window onkeyup={handleKeyUp} />
 
 <div class="center">
 	<Module text="upload file">
@@ -232,7 +254,7 @@
 				bind:value={text}
 			></textarea>
 			<div class="bottom-buttons">
-				<button class="cancel" onclick={cancelUpload}>cancel</button>
+				<button class="cancel" onclick={cancelUploadButton}>cancel</button>
 				<button class="upload" onclick={uploadFile} disabled={buttonDisabled}>
 					<div class="back-text">{buttonText}</div>
 					<div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
@@ -259,6 +281,8 @@
 		</div>
 	</Module>
 </div>
+
+<Popup text={popupText} bind:displaying={displayingPopup} bind:submit={acknowledge}></Popup>
 
 <style lang="scss">
 	@use '../vars' as *;
