@@ -3,6 +3,7 @@
 	import { Encryptor, formatSize, persistIfNeeded, roundToDecimal, tryRemoveFileEntry } from '$lib';
 	import type { Encrypted } from '$lib/types';
 	import Module from '../components/Module.svelte';
+	import Help from '../components/Help.svelte';
 
 	let buttonDisabled = $state(false);
 
@@ -197,8 +198,6 @@
 			uploadFile();
 		}
 	}
-
-	
 </script>
 
 <svelte:window onkeypress={handleKeyDown} />
@@ -245,7 +244,11 @@
 	</Module>
 	<Module text="options">
 		<div class="options">
-			<span class="option-label">encryption</span>
+			<span class="option-label"
+				>encryption<Help
+					text="encryption is 100% client-side. the server only ever sees the file name, size, type, and the encrypted data."
+				/></span
+			>
 			<!-- NOTE: add a (?) note that tells the user it's client-side encrypted, the filename is not though -->
 			<button class="switch" onclick={toggleEncryption} aria-label="Toggle Encryption">
 				<div class={(encryptionEnabled ? 'switch-active ' : '') + 'switch-circle'}></div>
@@ -400,9 +403,13 @@
 		display: grid;
 
 		grid-template-rows: 1fr 1fr;
-		grid-template-columns: 0.5fr 1fr;
+		grid-template-columns: 0.6fr 1fr;
 
 		gap: $padding;
+	}
+
+	.help-icon {
+		margin-left: $smaller-padding;
 	}
 
 	.switch {
@@ -445,6 +452,7 @@
 	}
 
 	.option-label {
+		display: flex;
 		margin: auto 0;
 	}
 </style>
