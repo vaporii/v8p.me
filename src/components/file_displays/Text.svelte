@@ -51,7 +51,6 @@
 	.wrapper {
 		max-height: 50vh;
 		overflow: scroll;
-		margin-bottom: $small-padding;
 	}
 
 	.copy {

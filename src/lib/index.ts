@@ -259,11 +259,22 @@ export const fileTypes: { ext: string; lang: LanguageType<string> }[] = [
 	// { ext: '', lang: langs.},
 ];
 
-export function isDisplayable(fileName: string): boolean {
+export function isDisplayable(fileName: string, fileType?: string): boolean {
+	let typeDisplayable = false;
+	if (fileType) {
+		const types = ['image', 'video']; // removed audio because it makes it too big
+		const splitType = fileType.split('/');
+		const type = splitType[0];
+		typeDisplayable = types.includes(type);
+	}
+
 	const split = fileName.split('.');
 	const ext = split[split.length - 1];
 
-	return !!fileTypes.find((type) => {
-		return type.ext === ext;
-	});
+	return (
+		typeDisplayable ||
+		!!fileTypes.find((type) => {
+			return type.ext === ext;
+		})
+	);
 }

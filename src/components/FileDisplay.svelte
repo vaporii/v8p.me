@@ -38,27 +38,47 @@
 </script>
 
 {#if type === 'audio'}
-	<audio controls>
-		<source src={url} type={fileInfo.fileType} />
-		your browser doesn't support this audio type :(
-	</audio>
+	<div class="wrapper">
+		<audio controls>
+			<source src={url} type={fileInfo.fileType} />
+			your browser doesn't support this audio type :(
+		</audio>
+	</div>
+	{@render children()}
 {:else if type === 'video'}
-	<video controls>
-		<source src={url} type={fileInfo.fileType} />
-		<track kind="captions" />
-		your browser doesn't support this video type :(
-	</video>
+	<div class="wrapper">
+		<video controls>
+			<source src={url} type={fileInfo.fileType} />
+			<track kind="captions" />
+			your browser doesn't support this video type :(
+		</video>
+	</div>
+	{@render children()}
 {:else if type === 'image'}
-	<img src={url} alt={fileInfo.fileName}>
+	<div class="wrapper">
+		<img src={url} alt={fileInfo.fileName} class="image-display" />
+	</div>
+	{@render children()}
 {:else if language || type === 'text'}
 	<Text {text} language={language?.lang || langs.plaintext}></Text>
+	{@render children()}
 {/if}
-
-{@render children()}
 
 <style lang="scss">
 	audio,
-	video {
+	video,
+	img {
+		max-width: 100%;
+		max-height: 50vh;
+	}
+
+	audio {
 		width: 100%;
+	}
+
+	.wrapper {
+		width: 100%;
+		display: flex;
+		justify-content: center;
 	}
 </style>

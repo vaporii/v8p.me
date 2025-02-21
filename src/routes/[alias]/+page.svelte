@@ -139,7 +139,8 @@
 
 <div
 	class={'center' +
-		((isDisplayable(data.fileName) && !showDecryptScreen) || data.fileType.startsWith('text/')
+		((isDisplayable(data.fileName, data.fileType) && !showDecryptScreen) ||
+		data.fileType.startsWith('text/')
 			? ' display'
 			: '')}
 >
@@ -173,7 +174,7 @@
 			</div>
 			<div class="separator"></div>
 			<FileDisplay fileInfo={data} url={downloadLink}>
-				<div class="separator"></div>
+				<div class="separator top-margin"></div>
 			</FileDisplay>
 			<div class="date">
 				uploaded <span class="strong">{date.day}</span> at <span class="strong">{date.time}</span>
@@ -217,7 +218,6 @@
 	}
 
 	.separator {
-		// height: $module-border;
 		border-top: $module-border solid $bg-2;
 		width: 100%;
 		margin-bottom: $small-padding;
@@ -273,5 +273,9 @@
 		bottom: 0;
 		background-color: $bg-0-soft;
 		clip-path: inset(0 0 0 50%);
+	}
+
+	.top-margin {
+		margin-top: $small-padding;
 	}
 </style>
