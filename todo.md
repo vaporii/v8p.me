@@ -5,7 +5,7 @@
 - [x] fix filesize on encrypted file info screen
 - [x] let user decrypt by pressing enter on pw input
 - [x] other keyboard shortcuts, ctrl+enter on main page will upload
-- [ ] file display on file screen
+- [x] file display on file screen
 - [ ] (?) things on encryption,
 - [ ] actual error screens (no password, persistent storage alert)
 - [ ] option to just use RAM for large files (has a (?) that explains that it will speed it up, but it should only be used for smaller files)

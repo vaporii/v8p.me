@@ -1,4 +1,6 @@
+import * as langs from 'svelte-highlight/languages';
 import type { Encrypted } from './types';
+import type { LanguageType } from 'svelte-highlight/languages';
 
 export class Encryptor {
 	private readonly iterations = 100000;
@@ -202,11 +204,66 @@ export async function persistIfNeeded(size: number) {
 	}
 }
 
-export function isDisplayable(fileName: string): boolean {
-	const exts = ['ts', 'js', 'html', 'c', 'zig', 'xml', 'json', 'md', 'rtf', 'txt', 'svelte'];
+export const fileTypes: { ext: string; lang: LanguageType<string> }[] = [
+	{ ext: 'js', lang: langs.javascript },
+	{ ext: '1c', lang: langs._1c },
+	{ ext: 'as', lang: langs.actionscript },
+	{ ext: 'ahk', lang: langs.autohotkey },
+	{ ext: 'awk', lang: langs.awk },
+	{ ext: 'sh', lang: langs.bash },
+	{ ext: 'bf', lang: langs.brainfuck },
+	{ ext: 'c', lang: langs.c },
+	{ ext: 'cmake', lang: langs.cmake },
+	{ ext: 'cpp', lang: langs.cpp },
+	{ ext: 'cs', lang: langs.csharp },
+	{ ext: 'css', lang: langs.css },
+	{ ext: 'd', lang: langs.d },
+	{ ext: 'md', lang: langs.markdown },
+	{ ext: 'dockerfile', lang: langs.dockerfile },
+	{ ext: 'dos', lang: langs.dos },
+	{ ext: 'rb', lang: langs.ruby },
+	{ ext: 'glsl', lang: langs.glsl },
+	{ ext: 'vsh', lang: langs.glsl },
+	{ ext: 'fsh', lang: langs.glsl },
+	{ ext: 'go', lang: langs.go },
+	{ ext: 'haml', lang: langs.haml },
+	{ ext: 'http', lang: langs.http },
+	{ ext: 'ini', lang: langs.ini },
+	{ ext: 'java', lang: langs.java },
+	{ ext: 'js', lang: langs.javascript },
+	{ ext: 'mjs', lang: langs.javascript },
+	{ ext: 'json', lang: langs.json },
+	{ ext: 'lua', lang: langs.lua },
+	{ ext: 'makefile', lang: langs.makefile },
+	{ ext: 'nix', lang: langs.nix },
+	{ ext: 'php', lang: langs.php },
+	{ ext: 'txt', lang: langs.plaintext },
+	{ ext: 'ps1', lang: langs.powershell },
+	{ ext: 'py', lang: langs.python },
+	{ ext: 'q', lang: langs.q },
+	{ ext: 'r', lang: langs.r },
+	{ ext: 'rs', lang: langs.rust },
+	{ ext: 'scala', lang: langs.scala },
+	{ ext: 'scss', lang: langs.scss },
+	{ ext: 'sh', lang: langs.shell },
+	{ ext: 'sql', lang: langs.sql },
+	{ ext: 'html', lang: langs.xml },
+	{ ext: 'xml', lang: langs.xml },
+	{ ext: 'yaml', lang: langs.yaml },
+	{ ext: 'tp', lang: langs.tp },
+	{ ext: 'ts', lang: langs.typescript },
+	{ ext: 'mts', lang: langs.typescript },
+	{ ext: 'vim', lang: langs.vim },
+	{ ext: 'wasm', lang: langs.wasm },
+	{ ext: 'asm', lang: langs.x86asm }
+	// { ext: '', lang: langs.},
+];
 
+export function isDisplayable(fileName: string): boolean {
 	const split = fileName.split('.');
 	const ext = split[split.length - 1];
 
-	return exts.includes(ext);
+	return !!fileTypes.find((type) => {
+		return type.ext === ext;
+	});
 }

@@ -6,24 +6,19 @@
 
 	import Text from './file_displays/Text.svelte';
 	import type { FileInfo } from '$lib/types';
+	import { fileTypes } from '$lib';
 
 	let { fileInfo, url, children }: { fileInfo: FileInfo; url: string; children: Snippet } =
 		$props();
+
+	let text = $state('loading...');
 
 	const type = fileInfo.fileType.split('/')[0];
 
 	const split = fileInfo.fileName.split('.');
 	const ext = split[split.length - 1];
 
-	let text = $state('loading...');
-
-	const types: { ext: string; lang: LanguageType<string> }[] = [
-		{ ext: 'js', lang: langs.javascript },
-		{ ext: 'ts', lang: langs.typescript },
-		{ ext: 'html', lang: langs.xml }
-	];
-
-	const language = types.find((type) => {
+	const language = fileTypes.find((type) => {
 		return type.ext === ext;
 	});
 
@@ -33,8 +28,8 @@
 	}
 
 	onMount(() => {
-		// only display under 1MB
-		if (fileInfo.fileSize < 1000 * 1000) {
+		// only display under 500KB
+		if (fileInfo.fileSize < 1000 * 500) {
 			getText();
 		} else {
 			text = 'text is too large to display';
