@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { page } from "$app/state";
-  import Module from "../components/Module.svelte";
+  import { page } from '$app/state';
+  import Module from '../components/Module.svelte';
   const path = page.url.pathname;
 </script>
 
@@ -27,8 +27,8 @@
 </div>
 
 <style lang="scss">
-  @use "../vars" as *;
-  
+  @use '../vars' as *;
+
   .wrapper {
     padding-bottom: $padding;
     color: $fg-3;
@@ -51,7 +51,7 @@
     font-size: 40px;
     line-height: 1.4em;
   }
-  
+
   @media screen and (max-width: 1000px) {
     .right {
       display: none;
@@ -78,7 +78,7 @@
   a {
     color: $accent !important;
   }
-  
+
   .cursor {
     animation: blink 1s infinite;
     animation-timing-function: steps(2, jump-none);

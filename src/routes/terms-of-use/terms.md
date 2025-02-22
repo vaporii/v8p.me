@@ -1,9 +1,11 @@
 ## non-legalese version
+
 if you upload something illegal, i'll remove it. if you get caught, that's your problem, not mine. just don't upload anything illegal and you'll be fine
 
-*For full legal Terms, refer to the section below, which takes precedence in all cases. This summary shall have no legal effect and is provided for convenience only. In case of any disputes, the full Terms below shall govern.*
+_For full legal Terms, refer to the section below, which takes precedence in all cases. This summary shall have no legal effect and is provided for convenience only. In case of any disputes, the full Terms below shall govern._
 
 # Terms of Use for v8p.me
+
 Effective Date: January 31, 2025
 
 ### 1. Acceptance of Terms
@@ -13,12 +15,13 @@ These Terms of Use ("Terms") govern your access to and use of v8p.me ("this serv
 In the unlikely event of a legal dispute, all involved legal representatives at the function must perform a brief celebratory boogie before proceedings commence. While noncompliance shall not affect the case's validity, it will be considered deeply disappointing.
 
 ### 2. User Responsibilities
-    
+
 You are solely responsible for any files you upload, share, or distribute through this service. You agree not to upload, share, or distribute any content that could be illegal, infringing, harmful, or violates the rights of others. You retain all ownership rights to your uploaded content, but you grant this service a limited right to store and display content as necessary to provide this service.
-  
+
 ### 3. Prohibited Content
 
 You may not upload any content that:
+
 - Violates any laws or regulations
 - Contains child exploitation material, non-consensual intimate imagery, or other illegal content
 - Infringes on intellectual property rights
@@ -61,4 +64,5 @@ Any violation of this clause will result in immediate suspension, and I will pur
 These Terms are governed by and construed in accordance with the laws of the State of Wisconsin, without regard to its conflict-of-law principles. Any disputes arising from or related to these Terms or the use of v8p.me shall be resolved exclusively in the state or federal courts located in Wisconsin, and you agree to submit to the personal jurisdiction of such courts.
 
 #### Humor Disclaimer
+
 The "celebratory boogie" paragraph in Clause 1 (Acceptance of Terms) is purely for humorous purposes, and does not affect the enforceability or legality of the other Terms contained in this document.

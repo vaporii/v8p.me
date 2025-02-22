@@ -1,6 +1,6 @@
 - [ ] ~~store ip addresses for complying with legal requests~~
-- [ ] ~~write a privacy policy because of ^ :(~~ *not anymore; this may be on the back-backlog if needed eventually, though*
-- [ ] ~~switch to mebibytes~~ *eventually maybe*
+- [ ] ~~write a privacy policy because of ^ :(~~ _not anymore; this may be on the back-backlog if needed eventually, though_
+- [ ] ~~switch to mebibytes~~ _eventually maybe_
 - [x] don't let the user click encrypt or decrypt buttons more than once
 - [x] fix filesize on encrypted file info screen
 - [x] let user decrypt by pressing enter on pw input

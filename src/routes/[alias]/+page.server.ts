@@ -1,20 +1,20 @@
 import type { FileInfo } from '$lib/types.js';
 
 export async function load({ params, locals }): Promise<FileInfo> {
-	const fileInfo = locals.stmts.getFileInfo.get(params.alias);
-	if (!fileInfo) {
-		throw new Error("alias doesn't exist");
-	}
+  const fileInfo = locals.stmts.getFileInfo.get(params.alias);
+  if (!fileInfo) {
+    throw new Error("alias doesn't exist");
+  }
 
-	const { alias, encrypted, fileName, filePath, fileType, timestamp, fileSize } = fileInfo;
+  const { alias, encrypted, fileName, filePath, fileType, timestamp, fileSize } = fileInfo;
 
-	return {
-		alias,
-		encrypted,
-		fileName,
-		filePath,
-		fileType,
-		timestamp,
+  return {
+    alias,
+    encrypted,
+    fileName,
+    filePath,
+    fileType,
+    timestamp,
     fileSize
-	};
+  };
 }

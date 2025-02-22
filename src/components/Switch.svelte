@@ -6,7 +6,7 @@
   }: {
     isActive?: boolean;
     label: string;
-    onClick?: (e: MouseEvent) => void
+    onClick?: (e: MouseEvent) => void;
   } = $props();
   const click = onClick || (() => {});
 
@@ -21,7 +21,7 @@
 </button>
 
 <style lang="scss">
-  @use "../vars" as *;
+  @use '../vars' as *;
 
   .switch {
     all: none;

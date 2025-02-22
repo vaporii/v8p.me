@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Snippet } from "svelte";
+  import type { Snippet } from 'svelte';
 
   let {
     text,
@@ -14,12 +14,12 @@
   <div class="module-in">
     {@render children()}
   </div>
-  <div class="module-text">{ text }</div>
+  <div class="module-text">{text}</div>
 </div>
 
 <style lang="scss">
-  @use "../vars" as *;
-  
+  @use '../vars' as *;
+
   .module-bg {
     background-color: $bg-0;
     box-sizing: border-box;

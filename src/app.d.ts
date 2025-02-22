@@ -5,18 +5,18 @@ import type { Database } from 'better-sqlite3';
 
 // for information about these interfaces
 declare global {
-	namespace App {
-		// interface Error {}
-		interface Locals {
-			db: Database;
-			filesPath: string;
-			stmts: Statements;
-			aliasLength: number;
-		}
-		// interface PageData {}
-		// interface PageState {}
-		// interface Platform {}
-	}
+  namespace App {
+    // interface Error {}
+    interface Locals {
+      db: Database;
+      filesPath: string;
+      stmts: Statements;
+      aliasLength: number;
+    }
+    // interface PageData {}
+    // interface PageState {}
+    // interface Platform {}
+  }
 }
 
 export {};

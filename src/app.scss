@@ -1,4 +1,4 @@
-@use "./vars" as *;
+@use './vars' as *;
 
 body {
   background-color: $bg;
@@ -114,12 +114,12 @@ input {
   width: 100%;
 }
 
-input[type="password"] {
+input[type='password'] {
   letter-spacing: 5px;
   font-size: $password-font-size;
 }
 
-input[type="password"]:focus {
+input[type='password']:focus {
   outline: $focus-outline;
 }
 

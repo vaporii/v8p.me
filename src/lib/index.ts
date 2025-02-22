@@ -3,278 +3,278 @@ import type { Encrypted } from './types';
 import type { LanguageType } from 'svelte-highlight/languages';
 
 export class Encryptor {
-	private readonly iterations = 100000;
-	private readonly chunkSize = 1 * 1000 * 1000; // 1mb per chunk
-	private readonly saltSize = 16;
+  private readonly iterations = 100000;
+  private readonly chunkSize = 1 * 1000 * 1000; // 1mb per chunk
+  private readonly saltSize = 16;
 
-	public async encrypt(
-		blob: Blob,
-		password: string,
-		progress?: (loaded: number, total: number) => any
-	): Promise<Encrypted> {
-		const chunkSize = this.chunkSize;
-		const size = blob.size;
-		const salt = window.crypto.getRandomValues(new Uint8Array(this.saltSize));
-		const key = await this.deriveKey(password, salt, this.iterations);
-		let offset = 0;
+  public async encrypt(
+    blob: Blob,
+    password: string,
+    progress?: (loaded: number, total: number) => any
+  ): Promise<Encrypted> {
+    const chunkSize = this.chunkSize;
+    const size = blob.size;
+    const salt = window.crypto.getRandomValues(new Uint8Array(this.saltSize));
+    const key = await this.deriveKey(password, salt, this.iterations);
+    let offset = 0;
 
-		let cancel = () => {};
+    let cancel = () => {};
 
-		const total = size + Math.ceil(size / this.chunkSize) * 12;
+    const total = size + Math.ceil(size / this.chunkSize) * 12;
 
-		const stream = new ReadableStream<Uint8Array>({
-			async start(controller) {
-				controller.enqueue(salt);
-				cancel = () => {
-					controller.error();
-				};
-			},
-			async pull(controller) {
-				const chunk = blob.slice(offset, offset + chunkSize);
-				const chunkArrayBuffer = await chunk.arrayBuffer();
-				const iv = window.crypto.getRandomValues(new Uint8Array(12));
-				const encryptedChunk = await window.crypto.subtle.encrypt(
-					{ name: 'AES-GCM', iv },
-					key,
-					chunkArrayBuffer
-				);
+    const stream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        controller.enqueue(salt);
+        cancel = () => {
+          controller.error();
+        };
+      },
+      async pull(controller) {
+        const chunk = blob.slice(offset, offset + chunkSize);
+        const chunkArrayBuffer = await chunk.arrayBuffer();
+        const iv = window.crypto.getRandomValues(new Uint8Array(12));
+        const encryptedChunk = await window.crypto.subtle.encrypt(
+          { name: 'AES-GCM', iv },
+          key,
+          chunkArrayBuffer
+        );
 
-				const data = new Blob([iv, new Uint8Array(encryptedChunk)]);
-				offset += chunkSize;
-				controller.enqueue(new Uint8Array(await data.arrayBuffer()));
-				progress && progress(Math.min(offset, total), total);
+        const data = new Blob([iv, new Uint8Array(encryptedChunk)]);
+        offset += chunkSize;
+        controller.enqueue(new Uint8Array(await data.arrayBuffer()));
+        progress && progress(Math.min(offset, total), total);
 
-				if (offset >= size) {
-					controller.close();
-				}
-			}
-		});
+        if (offset >= size) {
+          controller.close();
+        }
+      }
+    });
 
-		return { stream, cancel };
-	}
+    return { stream, cancel };
+  }
 
-	public async decrypt(
-		blob: Blob,
-		password: string,
-		progress?: (loaded: number, total: number) => any
-	): Promise<Encrypted> {
-		const saltSize = this.saltSize;
+  public async decrypt(
+    blob: Blob,
+    password: string,
+    progress?: (loaded: number, total: number) => any
+  ): Promise<Encrypted> {
+    const saltSize = this.saltSize;
 
-		// add iv size and aes-gcm 16 bit authentication tag
-		const chunkSize = this.chunkSize + 12 + 16;
+    // add iv size and aes-gcm 16 bit authentication tag
+    const chunkSize = this.chunkSize + 12 + 16;
 
-		const salt = await blob.slice(0, saltSize).arrayBuffer();
-		const key = await this.deriveKey(password, new Uint8Array(salt), this.iterations);
+    const salt = await blob.slice(0, saltSize).arrayBuffer();
+    const key = await this.deriveKey(password, new Uint8Array(salt), this.iterations);
 
-		// salt takes up first bytes
-		let offset = this.saltSize;
-		const total = blob.size;
+    // salt takes up first bytes
+    let offset = this.saltSize;
+    const total = blob.size;
 
-		let cancel = () => {};
+    let cancel = () => {};
 
-		const stream = new ReadableStream<Uint8Array>({
-			async start(controller) {
-				cancel = () => {
-					controller.error();
-				};
-			},
-			async pull(controller) {
-				const chunk = blob.slice(offset, offset + chunkSize);
-				const chunkArrayBuffer = await chunk.arrayBuffer();
-				const iv = chunkArrayBuffer.slice(0, 12);
-				const ciphertext = chunkArrayBuffer.slice(12);
-				try {
-					let decryptedBuffer: ArrayBuffer;
-					try {
-						decryptedBuffer = await window.crypto.subtle.decrypt(
-							{ name: 'AES-GCM', iv },
-							key,
-							ciphertext
-						);
-					} catch (e) {
-						console.error('error decrypting');
-						console.error(e);
-						throw e;
-					}
+    const stream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        cancel = () => {
+          controller.error();
+        };
+      },
+      async pull(controller) {
+        const chunk = blob.slice(offset, offset + chunkSize);
+        const chunkArrayBuffer = await chunk.arrayBuffer();
+        const iv = chunkArrayBuffer.slice(0, 12);
+        const ciphertext = chunkArrayBuffer.slice(12);
+        try {
+          let decryptedBuffer: ArrayBuffer;
+          try {
+            decryptedBuffer = await window.crypto.subtle.decrypt(
+              { name: 'AES-GCM', iv },
+              key,
+              ciphertext
+            );
+          } catch (e) {
+            console.error('error decrypting');
+            console.error(e);
+            throw e;
+          }
 
-					offset += chunkSize;
-					controller.enqueue(new Uint8Array(decryptedBuffer));
-					progress && progress(Math.min(offset, total) - saltSize, total - saltSize);
-				} catch (e) {
-					controller.error(e);
-				}
+          offset += chunkSize;
+          controller.enqueue(new Uint8Array(decryptedBuffer));
+          progress && progress(Math.min(offset, total) - saltSize, total - saltSize);
+        } catch (e) {
+          controller.error(e);
+        }
 
-				if (offset >= total) {
-					controller.close();
-				}
-			}
-		});
-		return { stream, cancel };
-	}
+        if (offset >= total) {
+          controller.close();
+        }
+      }
+    });
+    return { stream, cancel };
+  }
 
-	private async deriveKey(key: string, salt: Uint8Array, iterations: number): Promise<CryptoKey> {
-		const baseKey = await window.crypto.subtle.importKey(
-			'raw',
-			new TextEncoder().encode(key),
-			'PBKDF2',
-			false,
-			['deriveKey']
-		);
+  private async deriveKey(key: string, salt: Uint8Array, iterations: number): Promise<CryptoKey> {
+    const baseKey = await window.crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(key),
+      'PBKDF2',
+      false,
+      ['deriveKey']
+    );
 
-		const derivedKey = await window.crypto.subtle.deriveKey(
-			{
-				name: 'PBKDF2',
-				salt,
-				iterations,
-				hash: 'SHA-256'
-			},
-			baseKey,
-			{
-				name: 'AES-GCM',
-				length: 256
-			},
-			false,
-			['encrypt', 'decrypt']
-		);
+    const derivedKey = await window.crypto.subtle.deriveKey(
+      {
+        name: 'PBKDF2',
+        salt,
+        iterations,
+        hash: 'SHA-256'
+      },
+      baseKey,
+      {
+        name: 'AES-GCM',
+        length: 256
+      },
+      false,
+      ['encrypt', 'decrypt']
+    );
 
-		return derivedKey;
-	}
+    return derivedKey;
+  }
 }
 
 const M = {
-	B: 1,
-	KB: 1000,
-	MB: 1000000,
-	GB: 1000000000,
-	TB: 1000000000000
+  B: 1,
+  KB: 1000,
+  MB: 1000000,
+  GB: 1000000000,
+  TB: 1000000000000
 };
 
 export function formatSize(bytes: number): string {
-	let formatted = 0.0;
-	let symbol = 'B';
+  let formatted = 0.0;
+  let symbol = 'B';
 
-	if (bytes < M.KB) {
-		formatted = bytes;
-		symbol = 'B';
-	} else if (bytes < M.MB) {
-		formatted = bytes / M.KB;
-		symbol = 'KB';
-	} else if (bytes < M.GB) {
-		formatted = bytes / M.MB;
-		symbol = 'MB';
-	} else if (bytes < M.TB) {
-		formatted = bytes / M.GB;
-		symbol = 'GB';
-	} else if (bytes >= M.TB) {
-		formatted = bytes / M.TB;
-		symbol = 'TB';
-	}
+  if (bytes < M.KB) {
+    formatted = bytes;
+    symbol = 'B';
+  } else if (bytes < M.MB) {
+    formatted = bytes / M.KB;
+    symbol = 'KB';
+  } else if (bytes < M.GB) {
+    formatted = bytes / M.MB;
+    symbol = 'MB';
+  } else if (bytes < M.TB) {
+    formatted = bytes / M.GB;
+    symbol = 'GB';
+  } else if (bytes >= M.TB) {
+    formatted = bytes / M.TB;
+    symbol = 'TB';
+  }
 
-	return Math.round(formatted * 100) / 100 + ' ' + symbol;
+  return Math.round(formatted * 100) / 100 + ' ' + symbol;
 }
 
 export function roundToDecimal(num: number, places: number): string {
-	return num.toFixed(places);
+  return num.toFixed(places);
 }
 
 export async function tryRemoveFileEntry(
-	root: FileSystemDirectoryHandle,
-	entry: string
+  root: FileSystemDirectoryHandle,
+  entry: string
 ): Promise<boolean> {
-	try {
-		await root.removeEntry(entry);
-		return true;
-	} catch {
-		return false;
-	}
+  try {
+    await root.removeEntry(entry);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function requestPersistentStorage() {
-	if (!(await navigator.storage.persist())) {
-		alert(
-			'persistent storage could not be enabled. some large files may not load properly or entirely'
-		); // TODO: replace this with an actual error (see figma design sheet)
-	}
+  if (!(await navigator.storage.persist())) {
+    alert(
+      'persistent storage could not be enabled. some large files may not load properly or entirely'
+    ); // TODO: replace this with an actual error (see figma design sheet)
+  }
 }
 
 export async function persistIfNeeded(size: number) {
-	const quota = (await navigator.storage.estimate()).quota;
-	if (!quota || size * 2 > quota) {
-		await requestPersistentStorage();
-	}
+  const quota = (await navigator.storage.estimate()).quota;
+  if (!quota || size * 2 > quota) {
+    await requestPersistentStorage();
+  }
 }
 
-export const fileTypes: { ext: string; lang: LanguageType<string> }[] = [
-	{ ext: 'js', lang: langs.javascript },
-	{ ext: '1c', lang: langs._1c },
-	{ ext: 'as', lang: langs.actionscript },
-	{ ext: 'ahk', lang: langs.autohotkey },
-	{ ext: 'awk', lang: langs.awk },
-	{ ext: 'sh', lang: langs.bash },
-	{ ext: 'bf', lang: langs.brainfuck },
-	{ ext: 'c', lang: langs.c },
-	{ ext: 'cmake', lang: langs.cmake },
-	{ ext: 'cpp', lang: langs.cpp },
-	{ ext: 'cs', lang: langs.csharp },
-	{ ext: 'css', lang: langs.css },
-	{ ext: 'd', lang: langs.d },
-	{ ext: 'md', lang: langs.markdown },
-	{ ext: 'dockerfile', lang: langs.dockerfile },
-	{ ext: 'dos', lang: langs.dos },
-	{ ext: 'rb', lang: langs.ruby },
-	{ ext: 'glsl', lang: langs.glsl },
-	{ ext: 'vsh', lang: langs.glsl },
-	{ ext: 'fsh', lang: langs.glsl },
-	{ ext: 'go', lang: langs.go },
-	{ ext: 'haml', lang: langs.haml },
-	{ ext: 'http', lang: langs.http },
-	{ ext: 'ini', lang: langs.ini },
-	{ ext: 'java', lang: langs.java },
-	{ ext: 'js', lang: langs.javascript },
-	{ ext: 'mjs', lang: langs.javascript },
-	{ ext: 'json', lang: langs.json },
-	{ ext: 'lua', lang: langs.lua },
-	{ ext: 'makefile', lang: langs.makefile },
-	{ ext: 'nix', lang: langs.nix },
-	{ ext: 'php', lang: langs.php },
-	{ ext: 'txt', lang: langs.plaintext },
-	{ ext: 'ps1', lang: langs.powershell },
-	{ ext: 'py', lang: langs.python },
-	{ ext: 'q', lang: langs.q },
-	{ ext: 'r', lang: langs.r },
-	{ ext: 'rs', lang: langs.rust },
-	{ ext: 'scala', lang: langs.scala },
-	{ ext: 'scss', lang: langs.scss },
-	{ ext: 'sh', lang: langs.shell },
-	{ ext: 'sql', lang: langs.sql },
-	{ ext: 'html', lang: langs.xml },
-	{ ext: 'xml', lang: langs.xml },
-	{ ext: 'yaml', lang: langs.yaml },
-	{ ext: 'tp', lang: langs.tp },
-	{ ext: 'ts', lang: langs.typescript },
-	{ ext: 'mts', lang: langs.typescript },
-	{ ext: 'vim', lang: langs.vim },
-	{ ext: 'wasm', lang: langs.wasm },
-	{ ext: 'asm', lang: langs.x86asm }
-	// { ext: '', lang: langs.},
+export const fileTypes: { ext: string; lang: LanguageType<string>; langName: string }[] = [
+  { ext: 'js', lang: langs.javascript, langName: 'javascript' },
+  { ext: '1c', lang: langs._1c, langName: '_1c' },
+  { ext: 'as', lang: langs.actionscript, langName: 'actionscript' },
+  { ext: 'ahk', lang: langs.autohotkey, langName: 'autohotkey' },
+  { ext: 'awk', lang: langs.awk, langName: 'awk' },
+  { ext: 'sh', lang: langs.bash, langName: 'bash' },
+  { ext: 'bf', lang: langs.brainfuck, langName: 'brainfuck' },
+  { ext: 'c', lang: langs.c, langName: 'c' },
+  { ext: 'cmake', lang: langs.cmake, langName: 'cmake' },
+  { ext: 'cpp', lang: langs.cpp, langName: 'cpp' },
+  { ext: 'cs', lang: langs.csharp, langName: 'csharp' },
+  { ext: 'css', lang: langs.css, langName: 'css' },
+  { ext: 'd', lang: langs.d, langName: 'd' },
+  { ext: 'md', lang: langs.markdown, langName: 'markdown' },
+  { ext: 'dockerfile', lang: langs.dockerfile, langName: 'dockerfile' },
+  { ext: 'dos', lang: langs.dos, langName: 'dos' },
+  { ext: 'rb', lang: langs.ruby, langName: 'ruby' },
+  { ext: 'glsl', lang: langs.glsl, langName: 'glsl' },
+  { ext: 'vsh', lang: langs.glsl, langName: 'glsl' },
+  { ext: 'fsh', lang: langs.glsl, langName: 'glsl' },
+  { ext: 'go', lang: langs.go, langName: 'go' },
+  { ext: 'haml', lang: langs.haml, langName: 'haml' },
+  { ext: 'http', lang: langs.http, langName: 'http' },
+  { ext: 'ini', lang: langs.ini, langName: 'ini' },
+  { ext: 'java', lang: langs.java, langName: 'java' },
+  { ext: 'js', lang: langs.javascript, langName: 'javascript' },
+  { ext: 'mjs', lang: langs.javascript, langName: 'javascript' },
+  { ext: 'json', lang: langs.json, langName: 'json' },
+  { ext: 'lua', lang: langs.lua, langName: 'lua' },
+  { ext: 'makefile', lang: langs.makefile, langName: 'makefile' },
+  { ext: 'nix', lang: langs.nix, langName: 'nix' },
+  { ext: 'php', lang: langs.php, langName: 'php' },
+  { ext: 'txt', lang: langs.plaintext, langName: 'plaintext' },
+  { ext: 'ps1', lang: langs.powershell, langName: 'powershell' },
+  { ext: 'py', lang: langs.python, langName: 'python' },
+  { ext: 'q', lang: langs.q, langName: 'q' },
+  { ext: 'r', lang: langs.r, langName: 'r' },
+  { ext: 'rs', lang: langs.rust, langName: 'rust' },
+  { ext: 'scala', lang: langs.scala, langName: 'scala' },
+  { ext: 'scss', lang: langs.scss, langName: 'scss' },
+  { ext: 'sh', lang: langs.shell, langName: 'shell' },
+  { ext: 'sql', lang: langs.sql, langName: 'sql' },
+  { ext: 'html', lang: langs.xml, langName: 'xml' },
+  { ext: 'xml', lang: langs.xml, langName: 'xml' },
+  { ext: 'yaml', lang: langs.yaml, langName: 'yaml' },
+  { ext: 'tp', lang: langs.tp, langName: 'tp' },
+  { ext: 'ts', lang: langs.typescript, langName: 'typescript' },
+  { ext: 'mts', lang: langs.typescript, langName: 'typescript' },
+  { ext: 'vim', lang: langs.vim, langName: 'vim' },
+  { ext: 'wasm', lang: langs.wasm, langName: 'wasm' },
+  { ext: 'asm', lang: langs.x86asm, langName: 'x86asm' }
+  // { ext: '', lang: langs.},
 ];
 
 export function isDisplayable(fileName: string, fileType?: string): boolean {
-	let typeDisplayable = false;
-	if (fileType) {
-		const types = ['image', 'video']; // removed audio because it makes it too big
-		const splitType = fileType.split('/');
-		const type = splitType[0];
-		typeDisplayable = types.includes(type);
-	}
+  let typeDisplayable = false;
+  if (fileType) {
+    const types = ['image', 'video', 'text']; // removed audio because it makes it too big
+    const splitType = fileType.split('/');
+    const type = splitType[0];
+    typeDisplayable = types.includes(type);
+  }
 
-	const split = fileName.split('.');
-	const ext = split[split.length - 1];
+  const split = fileName.split('.');
+  const ext = split[split.length - 1];
 
-	return (
-		typeDisplayable ||
-		!!fileTypes.find((type) => {
-			return type.ext === ext;
-		})
-	);
+  return (
+    typeDisplayable ||
+    !!fileTypes.find((type) => {
+      return type.ext === ext;
+    })
+  );
 }

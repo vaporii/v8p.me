@@ -11,7 +11,7 @@
   });
 </script>
 
-<img src="/icons/help.svg" alt="help icon" bind:this={icon}>
+<img src="/icons/help.svg" alt="help icon" bind:this={icon} />
 
 <div class="popup" style={`left: ${left}px; top: ${top}px;`}>
   <div class="arrow"></div>
@@ -20,7 +20,7 @@
 </div>
 
 <style lang="scss">
-	@use '/src/vars' as *;
+  @use '/src/vars' as *;
 
   img {
     margin-left: $smaller-padding;

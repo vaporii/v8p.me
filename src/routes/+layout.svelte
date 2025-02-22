@@ -1,14 +1,14 @@
 <script lang="ts">
-	import "@fontsource/jetbrains-mono";
-	import '../app.scss';
+  import '@fontsource/jetbrains-mono';
+  import '../app.scss';
 
-	let { children } = $props();
+  let { children } = $props();
 </script>
 
 <div class="app">
-	<main>
-		{@render children()}
-	</main>
+  <main>
+    {@render children()}
+  </main>
 </div>
 
 <style>
