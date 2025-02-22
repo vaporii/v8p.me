@@ -34,7 +34,7 @@
   </button>
   <div class="wrapper">
     <div class="inner-wrapper">
-      <span class="lang-name">{language.name}</span>
+      <span class="lang-name">preview ({language.name})</span>
       <Highlight {language} code={text} let:highlighted>
         <LineNumbers {highlighted} --padding-left="5px" --padding-right="10px" hideBorder />
       </Highlight>

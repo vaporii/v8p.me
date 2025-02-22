@@ -4,6 +4,10 @@
   const path = page.url.pathname;
 </script>
 
+<svelte:head>
+  <title>page not found :(</title>
+</svelte:head>
+
 <div class="wrapper">
   <div class="left">
     <h1>404</h1>

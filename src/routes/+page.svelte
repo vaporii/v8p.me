@@ -224,6 +224,10 @@
 
 <svelte:window onkeyup={handleKeyUp} />
 
+<svelte:head>
+  <title>v8p.me</title>
+</svelte:head>
+
 <div class="center">
   <Module text="upload file">
     <div class="upload-file">
