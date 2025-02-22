@@ -85,17 +85,11 @@ export class Encryptor {
         const ciphertext = chunkArrayBuffer.slice(12);
         try {
           let decryptedBuffer: ArrayBuffer;
-          try {
-            decryptedBuffer = await window.crypto.subtle.decrypt(
-              { name: "AES-GCM", iv },
-              key,
-              ciphertext
-            );
-          } catch (e) {
-            console.error("error decrypting");
-            console.error(e);
-            throw e;
-          }
+          decryptedBuffer = await window.crypto.subtle.decrypt(
+            { name: "AES-GCM", iv },
+            key,
+            ciphertext
+          );
 
           offset += chunkSize;
           controller.enqueue(new Uint8Array(decryptedBuffer));

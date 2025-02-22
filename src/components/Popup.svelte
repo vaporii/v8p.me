@@ -32,7 +32,15 @@
 
   cancel = cancelBtn;
   submit = submitBtn;
+
+  async function keyPress(e: KeyboardEvent) {
+    if (e.key === "Escape") {
+      cancel && await cancel();
+    }
+  }
 </script>
+
+<svelte:window onkeyup={keyPress} />
 
 <div class={"center" + (displaying ? " display" : "")}>
   <Module text={titleText || "confirm"}>

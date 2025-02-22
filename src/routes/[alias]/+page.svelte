@@ -9,6 +9,7 @@
   } from "$lib";
   import FileDisplay from "../../components/FileDisplay.svelte";
   import Module from "../../components/Module.svelte";
+  import Popup from "../../components/Popup.svelte";
   let { data } = $props();
 
   let buttonDisabled = $state(false);
@@ -19,6 +20,9 @@
 
   let downloadLink = $state(`/${data.alias}/direct`);
   let showDecryptScreen = $state(Boolean(data.encrypted));
+
+  let popupText = $state("incorrect password entered!");
+  let displayingPopup = $state(false);
 
   let root: FileSystemDirectoryHandle;
 
@@ -115,6 +119,9 @@
     try {
       await encrypted.stream.pipeTo(writable);
     } catch (e) {
+      if (e instanceof DOMException) {
+        displayingPopup = true;
+      }
       progressPercentage = 0;
       buttonText = "failed";
       await tryRemoveFileEntry(root, "file_v8p.me");
@@ -179,6 +186,8 @@
     {/if}
   </Module>
 </div>
+
+<Popup text={popupText} bind:displaying={displayingPopup} />
 
 <style lang="scss">
   @use "../../vars" as *;
