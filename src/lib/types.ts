@@ -1,4 +1,4 @@
-import type { Statement } from 'better-sqlite3';
+import type { Statement } from "better-sqlite3";
 
 export interface FileInfo {
   alias: string;

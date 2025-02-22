@@ -1,14 +1,14 @@
-import type { ClientFileInfo } from '$lib/types';
-import type { RequestHandler } from '@sveltejs/kit';
-import type { Database } from 'better-sqlite3';
-import * as fs from 'fs';
-import path from 'path';
+import type { ClientFileInfo } from "$lib/types";
+import type { RequestHandler } from "@sveltejs/kit";
+import type { Database } from "better-sqlite3";
+import * as fs from "fs";
+import path from "path";
 
 function generateRandomString(length: number): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnopqrstuvwxyz23456789';
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnopqrstuvwxyz23456789";
   const array = new Uint32Array(length);
   crypto.getRandomValues(array);
-  let result = '';
+  let result = "";
   for (let i = 0; i < length; i++) {
     result += chars[array[i] % chars.length];
   }
@@ -16,16 +16,16 @@ function generateRandomString(length: number): string {
 }
 
 function processHeaders(req: Request): ClientFileInfo {
-  const fileName = req.headers.get('X-File-Name');
-  const fileType = req.headers.get('X-File-Type');
-  const fileSize = req.headers.get('X-File-Size');
-  const encrypted = req.headers.get('X-Encrypted');
-  if (!fileName) throw new Error('X-File-Name header missing');
-  if (!fileType) throw new Error('X-File-Type header missing');
+  const fileName = req.headers.get("X-File-Name");
+  const fileType = req.headers.get("X-File-Type");
+  const fileSize = req.headers.get("X-File-Size");
+  const encrypted = req.headers.get("X-Encrypted");
+  if (!fileName) throw new Error("X-File-Name header missing");
+  if (!fileType) throw new Error("X-File-Type header missing");
   if (!fileSize || isNaN(Number(fileSize)))
-    throw new Error('X-File-Size header missing or invalid');
+    throw new Error("X-File-Size header missing or invalid");
   if (!encrypted || isNaN(Number(encrypted)))
-    throw new Error('X-Encrypted header missing or invalid');
+    throw new Error("X-Encrypted header missing or invalid");
 
   return {
     fileName: decodeURIComponent(fileName),
@@ -38,7 +38,7 @@ function processHeaders(req: Request): ClientFileInfo {
 async function writeFile(filePath: string, reader: ReadableStreamDefaultReader<Uint8Array>) {
   const writeStream = fs.createWriteStream(filePath);
 
-  writeStream.addListener('error', (err) => {
+  writeStream.addListener("error", (err) => {
     throw err;
   });
 
@@ -75,7 +75,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     await writeFile(filePath, reader);
   } catch (e) {
     console.error(e);
-    return new Response('Unexpected error while writing file', { status: 500 });
+    return new Response("Unexpected error while writing file", { status: 500 });
   }
 
   let clientHeaders: ClientFileInfo;

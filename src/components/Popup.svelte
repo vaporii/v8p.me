@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import Module from './Module.svelte';
+  import { onMount } from "svelte";
+  import Module from "./Module.svelte";
 
   let {
     titleText,
@@ -40,8 +40,8 @@
 
 <svelte:window onkeypress={keyPress} />
 
-<div class={'center' + (displaying ? ' display' : '')}>
-  <Module text={titleText || 'confirm'}>
+<div class={"center" + (displaying ? " display" : "")}>
+  <Module text={titleText || "confirm"}>
     <span>{text}</span>
     <div class="buttons">
       <button class="old submit" onclick={submitBtn}>&lt;acknowledge&gt;</button>
@@ -51,7 +51,7 @@
 </div>
 
 <style lang="scss">
-  @use '/src/vars' as *;
+  @use "/src/vars" as *;
 
   .center {
     max-width: 520px;

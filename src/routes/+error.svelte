@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { page } from '$app/state';
-  import Module from '../components/Module.svelte';
+  import { page } from "$app/state";
+  import Module from "../components/Module.svelte";
   const path = page.url.pathname;
 </script>
 
@@ -27,7 +27,7 @@
 </div>
 
 <style lang="scss">
-  @use '../vars' as *;
+  @use "../vars" as *;
 
   .wrapper {
     padding-bottom: $padding;

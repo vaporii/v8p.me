@@ -1,11 +1,11 @@
-import fs, { statSync } from 'fs';
-import type { RequestHandler } from '@sveltejs/kit';
-import { createReadableStream } from '@sveltejs/kit/node';
+import fs, { statSync } from "fs";
+import type { RequestHandler } from "@sveltejs/kit";
+import { createReadableStream } from "@sveltejs/kit/node";
 
 export const GET: RequestHandler = async ({ request, params, locals }) => {
   const { alias } = params;
   if (!alias) {
-    return new Response('alias is not defined', { status: 400 });
+    return new Response("alias is not defined", { status: 400 });
   }
 
   const fileData = locals.stmts.getFileInfo.get(alias);
@@ -18,10 +18,10 @@ export const GET: RequestHandler = async ({ request, params, locals }) => {
     const file = createReadableStream(fileData.filePath);
 
     return new Response(file, {
-      headers: { 'Content-Type': fileData.fileType, 'Content-Length': size.toString() }
+      headers: { "Content-Type": fileData.fileType, "Content-Length": size.toString() }
     });
   } catch (e) {
     console.error(e);
-    return new Response('error retrieving file', { status: 500 });
+    return new Response("error retrieving file", { status: 500 });
   }
 };

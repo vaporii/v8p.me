@@ -1,4 +1,4 @@
-import type { FileInfo } from '$lib/types.js';
+import type { FileInfo } from "$lib/types.js";
 
 export async function load({ params, locals }): Promise<FileInfo> {
   const fileInfo = locals.stmts.getFileInfo.get(params.alias);

@@ -1,6 +1,6 @@
-import * as langs from 'svelte-highlight/languages';
-import type { Encrypted } from './types';
-import type { LanguageType } from 'svelte-highlight/languages';
+import * as langs from "svelte-highlight/languages";
+import type { Encrypted } from "./types";
+import type { LanguageType } from "svelte-highlight/languages";
 
 export class Encryptor {
   private readonly iterations = 100000;
@@ -34,7 +34,7 @@ export class Encryptor {
         const chunkArrayBuffer = await chunk.arrayBuffer();
         const iv = window.crypto.getRandomValues(new Uint8Array(12));
         const encryptedChunk = await window.crypto.subtle.encrypt(
-          { name: 'AES-GCM', iv },
+          { name: "AES-GCM", iv },
           key,
           chunkArrayBuffer
         );
@@ -87,12 +87,12 @@ export class Encryptor {
           let decryptedBuffer: ArrayBuffer;
           try {
             decryptedBuffer = await window.crypto.subtle.decrypt(
-              { name: 'AES-GCM', iv },
+              { name: "AES-GCM", iv },
               key,
               ciphertext
             );
           } catch (e) {
-            console.error('error decrypting');
+            console.error("error decrypting");
             console.error(e);
             throw e;
           }
@@ -114,27 +114,27 @@ export class Encryptor {
 
   private async deriveKey(key: string, salt: Uint8Array, iterations: number): Promise<CryptoKey> {
     const baseKey = await window.crypto.subtle.importKey(
-      'raw',
+      "raw",
       new TextEncoder().encode(key),
-      'PBKDF2',
+      "PBKDF2",
       false,
-      ['deriveKey']
+      ["deriveKey"]
     );
 
     const derivedKey = await window.crypto.subtle.deriveKey(
       {
-        name: 'PBKDF2',
+        name: "PBKDF2",
         salt,
         iterations,
-        hash: 'SHA-256'
+        hash: "SHA-256"
       },
       baseKey,
       {
-        name: 'AES-GCM',
+        name: "AES-GCM",
         length: 256
       },
       false,
-      ['encrypt', 'decrypt']
+      ["encrypt", "decrypt"]
     );
 
     return derivedKey;
@@ -151,26 +151,26 @@ const M = {
 
 export function formatSize(bytes: number): string {
   let formatted = 0.0;
-  let symbol = 'B';
+  let symbol = "B";
 
   if (bytes < M.KB) {
     formatted = bytes;
-    symbol = 'B';
+    symbol = "B";
   } else if (bytes < M.MB) {
     formatted = bytes / M.KB;
-    symbol = 'KB';
+    symbol = "KB";
   } else if (bytes < M.GB) {
     formatted = bytes / M.MB;
-    symbol = 'MB';
+    symbol = "MB";
   } else if (bytes < M.TB) {
     formatted = bytes / M.GB;
-    symbol = 'GB';
+    symbol = "GB";
   } else if (bytes >= M.TB) {
     formatted = bytes / M.TB;
-    symbol = 'TB';
+    symbol = "TB";
   }
 
-  return Math.round(formatted * 100) / 100 + ' ' + symbol;
+  return Math.round(formatted * 100) / 100 + " " + symbol;
 }
 
 export function roundToDecimal(num: number, places: number): string {
@@ -192,7 +192,7 @@ export async function tryRemoveFileEntry(
 export async function requestPersistentStorage() {
   if (!(await navigator.storage.persist())) {
     alert(
-      'persistent storage could not be enabled. some large files may not load properly or entirely'
+      "persistent storage could not be enabled. some large files may not load properly or entirely"
     ); // TODO: replace this with an actual error (see figma design sheet)
   }
 }
@@ -205,70 +205,70 @@ export async function persistIfNeeded(size: number) {
 }
 
 export const fileTypes: { ext: string; lang: LanguageType<string>; langName: string }[] = [
-  { ext: 'js', lang: langs.javascript, langName: 'javascript' },
-  { ext: '1c', lang: langs._1c, langName: '_1c' },
-  { ext: 'as', lang: langs.actionscript, langName: 'actionscript' },
-  { ext: 'ahk', lang: langs.autohotkey, langName: 'autohotkey' },
-  { ext: 'awk', lang: langs.awk, langName: 'awk' },
-  { ext: 'sh', lang: langs.bash, langName: 'bash' },
-  { ext: 'bf', lang: langs.brainfuck, langName: 'brainfuck' },
-  { ext: 'c', lang: langs.c, langName: 'c' },
-  { ext: 'cmake', lang: langs.cmake, langName: 'cmake' },
-  { ext: 'cpp', lang: langs.cpp, langName: 'cpp' },
-  { ext: 'cs', lang: langs.csharp, langName: 'csharp' },
-  { ext: 'css', lang: langs.css, langName: 'css' },
-  { ext: 'd', lang: langs.d, langName: 'd' },
-  { ext: 'md', lang: langs.markdown, langName: 'markdown' },
-  { ext: 'dockerfile', lang: langs.dockerfile, langName: 'dockerfile' },
-  { ext: 'dos', lang: langs.dos, langName: 'dos' },
-  { ext: 'rb', lang: langs.ruby, langName: 'ruby' },
-  { ext: 'glsl', lang: langs.glsl, langName: 'glsl' },
-  { ext: 'vsh', lang: langs.glsl, langName: 'glsl' },
-  { ext: 'fsh', lang: langs.glsl, langName: 'glsl' },
-  { ext: 'go', lang: langs.go, langName: 'go' },
-  { ext: 'haml', lang: langs.haml, langName: 'haml' },
-  { ext: 'http', lang: langs.http, langName: 'http' },
-  { ext: 'ini', lang: langs.ini, langName: 'ini' },
-  { ext: 'java', lang: langs.java, langName: 'java' },
-  { ext: 'js', lang: langs.javascript, langName: 'javascript' },
-  { ext: 'mjs', lang: langs.javascript, langName: 'javascript' },
-  { ext: 'json', lang: langs.json, langName: 'json' },
-  { ext: 'lua', lang: langs.lua, langName: 'lua' },
-  { ext: 'makefile', lang: langs.makefile, langName: 'makefile' },
-  { ext: 'nix', lang: langs.nix, langName: 'nix' },
-  { ext: 'php', lang: langs.php, langName: 'php' },
-  { ext: 'txt', lang: langs.plaintext, langName: 'plaintext' },
-  { ext: 'ps1', lang: langs.powershell, langName: 'powershell' },
-  { ext: 'py', lang: langs.python, langName: 'python' },
-  { ext: 'q', lang: langs.q, langName: 'q' },
-  { ext: 'r', lang: langs.r, langName: 'r' },
-  { ext: 'rs', lang: langs.rust, langName: 'rust' },
-  { ext: 'scala', lang: langs.scala, langName: 'scala' },
-  { ext: 'scss', lang: langs.scss, langName: 'scss' },
-  { ext: 'sh', lang: langs.shell, langName: 'shell' },
-  { ext: 'sql', lang: langs.sql, langName: 'sql' },
-  { ext: 'html', lang: langs.xml, langName: 'xml' },
-  { ext: 'xml', lang: langs.xml, langName: 'xml' },
-  { ext: 'yaml', lang: langs.yaml, langName: 'yaml' },
-  { ext: 'tp', lang: langs.tp, langName: 'tp' },
-  { ext: 'ts', lang: langs.typescript, langName: 'typescript' },
-  { ext: 'mts', lang: langs.typescript, langName: 'typescript' },
-  { ext: 'vim', lang: langs.vim, langName: 'vim' },
-  { ext: 'wasm', lang: langs.wasm, langName: 'wasm' },
-  { ext: 'asm', lang: langs.x86asm, langName: 'x86asm' }
+  { ext: "js", lang: langs.javascript, langName: "javascript" },
+  { ext: "1c", lang: langs._1c, langName: "_1c" },
+  { ext: "as", lang: langs.actionscript, langName: "actionscript" },
+  { ext: "ahk", lang: langs.autohotkey, langName: "autohotkey" },
+  { ext: "awk", lang: langs.awk, langName: "awk" },
+  { ext: "sh", lang: langs.bash, langName: "bash" },
+  { ext: "bf", lang: langs.brainfuck, langName: "brainfuck" },
+  { ext: "c", lang: langs.c, langName: "c" },
+  { ext: "cmake", lang: langs.cmake, langName: "cmake" },
+  { ext: "cpp", lang: langs.cpp, langName: "cpp" },
+  { ext: "cs", lang: langs.csharp, langName: "csharp" },
+  { ext: "css", lang: langs.css, langName: "css" },
+  { ext: "d", lang: langs.d, langName: "d" },
+  { ext: "md", lang: langs.markdown, langName: "markdown" },
+  { ext: "dockerfile", lang: langs.dockerfile, langName: "dockerfile" },
+  { ext: "dos", lang: langs.dos, langName: "dos" },
+  { ext: "rb", lang: langs.ruby, langName: "ruby" },
+  { ext: "glsl", lang: langs.glsl, langName: "glsl" },
+  { ext: "vsh", lang: langs.glsl, langName: "glsl" },
+  { ext: "fsh", lang: langs.glsl, langName: "glsl" },
+  { ext: "go", lang: langs.go, langName: "go" },
+  { ext: "haml", lang: langs.haml, langName: "haml" },
+  { ext: "http", lang: langs.http, langName: "http" },
+  { ext: "ini", lang: langs.ini, langName: "ini" },
+  { ext: "java", lang: langs.java, langName: "java" },
+  { ext: "js", lang: langs.javascript, langName: "javascript" },
+  { ext: "mjs", lang: langs.javascript, langName: "javascript" },
+  { ext: "json", lang: langs.json, langName: "json" },
+  { ext: "lua", lang: langs.lua, langName: "lua" },
+  { ext: "makefile", lang: langs.makefile, langName: "makefile" },
+  { ext: "nix", lang: langs.nix, langName: "nix" },
+  { ext: "php", lang: langs.php, langName: "php" },
+  { ext: "txt", lang: langs.plaintext, langName: "plaintext" },
+  { ext: "ps1", lang: langs.powershell, langName: "powershell" },
+  { ext: "py", lang: langs.python, langName: "python" },
+  { ext: "q", lang: langs.q, langName: "q" },
+  { ext: "r", lang: langs.r, langName: "r" },
+  { ext: "rs", lang: langs.rust, langName: "rust" },
+  { ext: "scala", lang: langs.scala, langName: "scala" },
+  { ext: "scss", lang: langs.scss, langName: "scss" },
+  { ext: "sh", lang: langs.shell, langName: "shell" },
+  { ext: "sql", lang: langs.sql, langName: "sql" },
+  { ext: "html", lang: langs.xml, langName: "xml" },
+  { ext: "xml", lang: langs.xml, langName: "xml" },
+  { ext: "yaml", lang: langs.yaml, langName: "yaml" },
+  { ext: "tp", lang: langs.tp, langName: "tp" },
+  { ext: "ts", lang: langs.typescript, langName: "typescript" },
+  { ext: "mts", lang: langs.typescript, langName: "typescript" },
+  { ext: "vim", lang: langs.vim, langName: "vim" },
+  { ext: "wasm", lang: langs.wasm, langName: "wasm" },
+  { ext: "asm", lang: langs.x86asm, langName: "x86asm" }
   // { ext: '', lang: langs.},
 ];
 
 export function isDisplayable(fileName: string, fileType?: string): boolean {
   let typeDisplayable = false;
   if (fileType) {
-    const types = ['image', 'video', 'text']; // removed audio because it makes it too big
-    const splitType = fileType.split('/');
+    const types = ["image", "video", "text"]; // removed audio because it makes it too big
+    const splitType = fileType.split("/");
     const type = splitType[0];
     typeDisplayable = types.includes(type);
   }
 
-  const split = fileName.split('.');
+  const split = fileName.split(".");
   const ext = split[split.length - 1];
 
   return (

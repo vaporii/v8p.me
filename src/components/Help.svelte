@@ -20,7 +20,7 @@
 </div>
 
 <style lang="scss">
-  @use '/src/vars' as *;
+  @use "/src/vars" as *;
 
   img {
     margin-left: $smaller-padding;

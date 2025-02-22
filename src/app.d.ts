@@ -1,7 +1,7 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 
-import type { Statements } from '$lib/types';
-import type { Database } from 'better-sqlite3';
+import type { Statements } from "$lib/types";
+import type { Database } from "better-sqlite3";
 
 // for information about these interfaces
 declare global {

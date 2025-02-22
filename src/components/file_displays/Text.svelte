@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Highlight, LineNumbers } from 'svelte-highlight';
-  import type { LanguageType } from 'svelte-highlight/languages';
-  import { gruvboxDarkMedium } from 'svelte-highlight/styles';
+  import { Highlight, LineNumbers } from "svelte-highlight";
+  import type { LanguageType } from "svelte-highlight/languages";
+  import { gruvboxDarkMedium } from "svelte-highlight/styles";
 
-  let iconUrl = $state('/icons/copy.svg');
+  let iconUrl = $state("/icons/copy.svg");
 
   let { text, language }: { text: string; language: LanguageType<string> } = $props();
   let timeout: any;
@@ -12,14 +12,14 @@
     if (timeout) clearTimeout(timeout);
     try {
       await navigator.clipboard.writeText(text);
-      iconUrl = '/icons/check.svg';
+      iconUrl = "/icons/check.svg";
     } catch (e) {
       console.error(e);
-      iconUrl = '/icons/error.svg';
+      iconUrl = "/icons/error.svg";
     }
 
     timeout = setTimeout(() => {
-      iconUrl = '/icons/copy.svg';
+      iconUrl = "/icons/copy.svg";
     }, 2000);
   }
 </script>
@@ -43,7 +43,7 @@
 </div>
 
 <style lang="scss">
-  @use '/src/vars' as *;
+  @use "/src/vars" as *;
 
   .outer-wrapper {
     position: relative;

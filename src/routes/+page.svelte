@@ -1,23 +1,23 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
-  import { Encryptor, formatSize, persistIfNeeded, roundToDecimal, tryRemoveFileEntry } from '$lib';
-  import type { Encrypted } from '$lib/types';
-  import Module from '../components/Module.svelte';
-  import Help from '../components/Help.svelte';
-  import Popup from '../components/Popup.svelte';
+  import { goto } from "$app/navigation";
+  import { Encryptor, formatSize, persistIfNeeded, roundToDecimal, tryRemoveFileEntry } from "$lib";
+  import type { Encrypted } from "$lib/types";
+  import Module from "../components/Module.svelte";
+  import Help from "../components/Help.svelte";
+  import Popup from "../components/Popup.svelte";
 
   let buttonDisabled = $state(false);
 
   let encryptionEnabled = $state(false);
-  let fileName = $state('drop file here');
-  let fileSize = $state('or, click to choose');
-  let iconSrc = $state('/icons/upload.svg');
-  let buttonText = $state('upload file or text');
-  let text = $state('');
-  let password = $state('');
+  let fileName = $state("drop file here");
+  let fileSize = $state("or, click to choose");
+  let iconSrc = $state("/icons/upload.svg");
+  let buttonText = $state("upload file or text");
+  let text = $state("");
+  let password = $state("");
   let progressPercentage = $state(0.0);
 
-  let popupText = $state('');
+  let popupText = $state("");
   let displayingPopup = $state(false);
 
   let dragging = $state(false);
@@ -40,7 +40,7 @@
       file = target.files[0];
       fileName = file.name;
       fileSize = formatSize(file.size);
-      iconSrc = '/icons/file.svg';
+      iconSrc = "/icons/file.svg";
     }
   }
 
@@ -48,15 +48,15 @@
     await stopUploadOrEncrypt();
 
     if (removeFile) {
-      fileName = 'drop file here';
-      fileSize = 'or, click to choose';
-      iconSrc = '/icons/upload.svg';
+      fileName = "drop file here";
+      fileSize = "or, click to choose";
+      iconSrc = "/icons/upload.svg";
 
       file = undefined;
-      text = '';
+      text = "";
     }
 
-    buttonText = 'upload file or text';
+    buttonText = "upload file or text";
     progressPercentage = 0;
 
     buttonDisabled = false;
@@ -87,7 +87,7 @@
     if (file) {
       thisFile = file;
     } else if (text.length > 0) {
-      thisFile = new File([new TextEncoder().encode(text)], 'text.txt', { type: 'text/plain' });
+      thisFile = new File([new TextEncoder().encode(text)], "text.txt", { type: "text/plain" });
     } else return; // TODO: error for not having file or text
 
     const name = thisFile.name;
@@ -98,11 +98,11 @@
     let root: FileSystemDirectoryHandle | undefined;
 
     buttonDisabled = true;
-    buttonText = 'starting...';
+    buttonText = "starting...";
 
     if (encryptionEnabled) {
       if (password.length === 0) {
-        popupText = 'password empty :(';
+        popupText = "password empty :(";
         displayingPopup = true;
 
         await cancelUpload();
@@ -112,9 +112,9 @@
       await persistIfNeeded(thisFile.size);
 
       root = await navigator.storage.getDirectory();
-      await tryRemoveFileEntry(root, 'file_v8p.me');
+      await tryRemoveFileEntry(root, "file_v8p.me");
 
-      const draftHandle = await root.getFileHandle('file_v8p.me', { create: true });
+      const draftHandle = await root.getFileHandle("file_v8p.me", { create: true });
       const writable = await draftHandle.createWritable();
 
       const stream = await encryptFile(thisFile, password);
@@ -139,15 +139,15 @@
     }
 
     const xhr = new XMLHttpRequest();
-    xhr.upload.addEventListener('progress', uploadProgressEvent);
+    xhr.upload.addEventListener("progress", uploadProgressEvent);
 
-    xhr.open('POST', '/', true);
+    xhr.open("POST", "/", true);
 
-    xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-    xhr.setRequestHeader('X-File-Name', encodeURIComponent(name));
-    xhr.setRequestHeader('X-File-Type', type.length === 0 ? 'text/plain' : type);
-    xhr.setRequestHeader('X-File-Size', size.toString());
-    xhr.setRequestHeader('X-Encrypted', String(Number(encrypted)));
+    xhr.setRequestHeader("Content-Type", "application/octet-stream");
+    xhr.setRequestHeader("X-File-Name", encodeURIComponent(name));
+    xhr.setRequestHeader("X-File-Type", type.length === 0 ? "text/plain" : type);
+    xhr.setRequestHeader("X-File-Size", size.toString());
+    xhr.setRequestHeader("X-Encrypted", String(Number(encrypted)));
 
     // NOTE: progress only works properly on chrome for some reason?
     // NOTE: maybe not
@@ -155,17 +155,17 @@
 
     stopUploadOrEncrypt = async () => {
       xhr.abort();
-      root?.removeEntry('file_v8p.me');
+      root?.removeEntry("file_v8p.me");
     };
 
-    xhr.addEventListener('readystatechange', (e) => {
+    xhr.addEventListener("readystatechange", (e) => {
       if (xhr.readyState === XMLHttpRequest.DONE) {
-        root?.removeEntry('file_v8p.me');
+        root?.removeEntry("file_v8p.me");
         if (xhr.status >= 200 && xhr.status < 400) {
-          buttonText = 'uploaded!';
+          buttonText = "uploaded!";
           goto(xhr.responseText);
         } else {
-          buttonText = 'failed';
+          buttonText = "failed";
         }
       }
     });
@@ -178,12 +178,12 @@
     dragging = false;
 
     if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
-      if (e.dataTransfer.items[0].kind !== 'file') return;
+      if (e.dataTransfer.items[0].kind !== "file") return;
       file = e.dataTransfer.items[0].getAsFile() as File;
 
       fileName = file.name;
       fileSize = formatSize(file.size);
-      iconSrc = '/icons/file.svg';
+      iconSrc = "/icons/file.svg";
     }
   }
 
@@ -209,13 +209,13 @@
   let acknowledge: () => any = $state(() => {});
 
   function handleKeyUp(e: KeyboardEvent) {
-    if (e.ctrlKey && e.key === 'Enter') {
+    if (e.ctrlKey && e.key === "Enter") {
       e.stopImmediatePropagation();
       e.stopPropagation();
       e.preventDefault();
       uploadFile();
     }
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       e.preventDefault();
       acknowledge();
     }
@@ -230,7 +230,7 @@
       <input type="file" name="file-upload" id="file-upload" onchange={handleFileChange} />
       <label
         id="file-select"
-        class={dragging ? 'dragging' : ''}
+        class={dragging ? "dragging" : ""}
         for="file-upload"
         ondrop={dropHandler}
         ondragover={dragOverHandler}
@@ -273,7 +273,7 @@
       >
       <!-- NOTE: add a (?) note that tells the user it's client-side encrypted, the filename is not though -->
       <button class="switch" onclick={toggleEncryption} aria-label="Toggle Encryption">
-        <div class={(encryptionEnabled ? 'switch-active ' : '') + 'switch-circle'}></div>
+        <div class={(encryptionEnabled ? "switch-active " : "") + "switch-circle"}></div>
       </button>
 
       <span class="option-label">password</span>
@@ -285,7 +285,7 @@
 <Popup text={popupText} bind:displaying={displayingPopup} bind:submit={acknowledge}></Popup>
 
 <style lang="scss">
-  @use '../vars' as *;
+  @use "../vars" as *;
 
   .upload-file {
     position: relative;

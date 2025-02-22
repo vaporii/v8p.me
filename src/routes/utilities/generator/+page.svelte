@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { roundToDecimal, tryRemoveFileEntry } from '$lib';
-  import Module from '../../../components/Module.svelte';
+  import { roundToDecimal, tryRemoveFileEntry } from "$lib";
+  import Module from "../../../components/Module.svelte";
   let fileSize = $state(0);
   let unit = $state(1);
-  let progress = $state('generate file');
+  let progress = $state("generate file");
 
   async function generateFile() {
     const size = fileSize * unit;
     const root = await navigator.storage.getDirectory();
-    await tryRemoveFileEntry(root, 'file_v8p.me');
+    await tryRemoveFileEntry(root, "file_v8p.me");
 
-    const draftHandle = await root.getFileHandle('file_v8p.me', { create: true });
+    const draftHandle = await root.getFileHandle("file_v8p.me", { create: true });
     const writable = await draftHandle.createWritable();
 
     let complete = 0;
@@ -35,9 +35,9 @@
 
     const file = await draftHandle.getFile();
     const url = URL.createObjectURL(file);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'file.bin';
+    a.download = "file.bin";
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -60,7 +60,7 @@
 </div>
 
 <style lang="scss">
-  @use '/src/vars' as *;
+  @use "/src/vars" as *;
 
   .wrapper {
     display: flex;

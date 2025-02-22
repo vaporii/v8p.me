@@ -6,15 +6,15 @@
     persistIfNeeded,
     roundToDecimal,
     tryRemoveFileEntry
-  } from '$lib';
-  import FileDisplay from '../../components/FileDisplay.svelte';
-  import Module from '../../components/Module.svelte';
+  } from "$lib";
+  import FileDisplay from "../../components/FileDisplay.svelte";
+  import Module from "../../components/Module.svelte";
   let { data } = $props();
 
   let buttonDisabled = $state(false);
 
-  let password = $state('');
-  let buttonText = $state('decrypt file');
+  let password = $state("");
+  let buttonText = $state("decrypt file");
   let progressPercentage = $state(0);
 
   let downloadLink = $state(`/${data.alias}/direct`);
@@ -26,16 +26,16 @@
 
   function convertDate(inputDate: number) {
     const date = new Date(inputDate);
-    const day = new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+    const day = new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
     })
       .format(date)
       .toLowerCase();
-    const time = new Intl.DateTimeFormat('en-US', {
-      hour: 'numeric',
-      minute: 'numeric',
+    const time = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "numeric",
       hour12: true
     })
       .format(date)
@@ -46,8 +46,8 @@
   const date = convertDate(data.timestamp);
 
   function handleKeypress(e: KeyboardEvent) {
-    if (e.key !== 'Enter') return;
-    console.log('click');
+    if (e.key !== "Enter") return;
+    console.log("click");
     button?.click();
   }
 
@@ -68,18 +68,18 @@
     const thisPassword = password;
 
     root = await navigator.storage.getDirectory();
-    await tryRemoveFileEntry(root, 'file_v8p.me');
-    const draftHandle = await root.getFileHandle('file_v8p.me', { create: true });
+    await tryRemoveFileEntry(root, "file_v8p.me");
+    const draftHandle = await root.getFileHandle("file_v8p.me", { create: true });
     let writable = await draftHandle.createWritable();
 
-    buttonText = 'waiting for storage...';
+    buttonText = "waiting for storage...";
     await persistIfNeeded(data.fileSize);
 
     const req = await fetch(`/${data.alias}/direct`);
     const stream = req.body;
     if (!stream) {
-      buttonText = 'failed';
-      console.error('stream was somehow not present in the request');
+      buttonText = "failed";
+      console.error("stream was somehow not present in the request");
       return;
     }
 
@@ -98,8 +98,8 @@
       await stream.pipeThrough(progressStream).pipeTo(writable);
     } catch (e) {
       progressPercentage = 0;
-      buttonText = 'failed';
-      await tryRemoveFileEntry(root, 'file_v8p.me');
+      buttonText = "failed";
+      await tryRemoveFileEntry(root, "file_v8p.me");
       console.error(e);
       return;
     }
@@ -116,8 +116,8 @@
       await encrypted.stream.pipeTo(writable);
     } catch (e) {
       progressPercentage = 0;
-      buttonText = 'failed';
-      await tryRemoveFileEntry(root, 'file_v8p.me');
+      buttonText = "failed";
+      await tryRemoveFileEntry(root, "file_v8p.me");
       console.error(e);
       return;
     }
@@ -129,7 +129,7 @@
   }
 
   function beforeUnload(e: BeforeUnloadEvent) {
-    tryRemoveFileEntry(root, 'file_v8p.me');
+    tryRemoveFileEntry(root, "file_v8p.me");
   }
 
   let button: HTMLButtonElement | undefined = $state();
@@ -138,10 +138,10 @@
 <svelte:window on:beforeunload={beforeUnload} />
 
 <div
-  class={'center' +
-    (isDisplayable(data.fileName, data.fileType) && !showDecryptScreen ? ' display' : '')}
+  class={"center" +
+    (isDisplayable(data.fileName, data.fileType) && !showDecryptScreen ? " display" : "")}
 >
-  <Module text={data.encrypted ? 'password protected' : 'file'}>
+  <Module text={data.encrypted ? "password protected" : "file"}>
     {#if showDecryptScreen}
       <input
         type="password"
@@ -181,7 +181,7 @@
 </div>
 
 <style lang="scss">
-  @use '../../vars' as *;
+  @use "../../vars" as *;
 
   .display {
     max-width: calc(100% - $padding * 2);

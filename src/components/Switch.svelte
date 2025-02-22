@@ -17,11 +17,11 @@
 </script>
 
 <button class="switch" onclick={toggleActive} aria-label={label}>
-  <div class={(isActive ? 'switch-active' : '') + ' switch-circle'}></div>
+  <div class={(isActive ? "switch-active" : "") + " switch-circle"}></div>
 </button>
 
 <style lang="scss">
-  @use '../vars' as *;
+  @use "../vars" as *;
 
   .switch {
     all: none;

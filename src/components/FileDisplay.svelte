@@ -1,21 +1,21 @@
 <script lang="ts">
-  import { onMount, type Snippet } from 'svelte';
+  import { onMount, type Snippet } from "svelte";
 
-  import * as langs from 'svelte-highlight/languages';
-  import { type LanguageType } from 'svelte-highlight/languages';
+  import * as langs from "svelte-highlight/languages";
+  import { type LanguageType } from "svelte-highlight/languages";
 
-  import Text from './file_displays/Text.svelte';
-  import type { FileInfo } from '$lib/types';
-  import { fileTypes } from '$lib';
+  import Text from "./file_displays/Text.svelte";
+  import type { FileInfo } from "$lib/types";
+  import { fileTypes } from "$lib";
 
   let { fileInfo, url, children }: { fileInfo: FileInfo; url: string; children: Snippet } =
     $props();
 
-  let text = $state('loading...');
+  let text = $state("loading...");
 
-  const type = fileInfo.fileType.split('/')[0];
+  const type = fileInfo.fileType.split("/")[0];
 
-  const split = fileInfo.fileName.split('.');
+  const split = fileInfo.fileName.split(".");
   const ext = split[split.length - 1];
 
   const language = fileTypes.find((type) => {
@@ -32,15 +32,15 @@
     if (fileInfo.fileSize < 1000 * 500) {
       getText();
     } else {
-      text = 'text is too large to display';
+      text = "text is too large to display";
     }
   });
 </script>
 
-{#if language || type === 'text'}
+{#if language || type === "text"}
   <Text {text} language={language?.lang || langs.plaintext}></Text>
   {@render children()}
-{:else if type === 'video'}
+{:else if type === "video"}
   <div class="wrapper">
     <video controls>
       <source src={url} />
@@ -49,12 +49,12 @@
     </video>
   </div>
   {@render children()}
-{:else if type === 'image'}
+{:else if type === "image"}
   <div class="wrapper">
     <img src={url} alt={fileInfo.fileName} class="image-display" />
   </div>
   {@render children()}
-{:else if type === 'audio'}
+{:else if type === "audio"}
   <div class="wrapper">
     <audio controls>
       <source src={url} type={fileInfo.fileType} />

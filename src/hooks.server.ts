@@ -1,7 +1,7 @@
-import type { Handle } from '@sveltejs/kit';
+import type { Handle } from "@sveltejs/kit";
 
-import sqlite3 from 'better-sqlite3';
-import env from 'dotenv';
+import sqlite3 from "better-sqlite3";
+import env from "dotenv";
 env.config();
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -25,7 +25,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   if (!event.locals.filesPath) {
     if (!process.env.FILES_DIR) {
-      throw new Error('FILES_DIR environment variable not defined');
+      throw new Error("FILES_DIR environment variable not defined");
     }
     event.locals.filesPath = process.env.FILES_DIR;
   }
@@ -42,9 +42,9 @@ export const handle: Handle = async ({ event, resolve }) => {
   if (!event.locals.stmts) {
     event.locals.stmts = {
       insertFileInfo: event.locals.db.prepare(
-        'INSERT INTO files(alias, fileName, timestamp, fileType, encrypted, filePath, fileSize) VALUES(?, ?, ?, ?, ?, ?, ?)'
+        "INSERT INTO files(alias, fileName, timestamp, fileType, encrypted, filePath, fileSize) VALUES(?, ?, ?, ?, ?, ?, ?)"
       ),
-      getFileInfo: event.locals.db.prepare('SELECT * FROM files WHERE alias=?')
+      getFileInfo: event.locals.db.prepare("SELECT * FROM files WHERE alias=?")
     };
   }
 
