@@ -32,13 +32,7 @@
 
   cancel = cancelBtn;
   submit = submitBtn;
-
-  function keyPress(e: KeyboardEvent) {
-    console.log(e.key);
-  }
 </script>
-
-<svelte:window onkeypress={keyPress} />
 
 <div class={"center" + (displaying ? " display" : "")}>
   <Module text={titleText || "confirm"}>

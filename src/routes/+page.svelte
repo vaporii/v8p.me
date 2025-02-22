@@ -270,18 +270,18 @@
   </Module>
   <Module text="options">
     <div class="options">
-      <span class="option-label"
+      <label class="option-label" for="encryption"
         >encryption<Help
           text="encryption is 100% client-side. the server only ever sees the file name, size, type, and the encrypted data."
-        /></span
+        /></label
       >
       <!-- NOTE: add a (?) note that tells the user it's client-side encrypted, the filename is not though -->
-      <button class="switch" onclick={toggleEncryption} aria-label="Toggle Encryption">
+      <button name="encryption" id="encryption" class="switch" onclick={toggleEncryption} aria-label="Toggle Encryption">
         <div class={(encryptionEnabled ? "switch-active " : "") + "switch-circle"}></div>
       </button>
 
-      <span class="option-label">password</span>
-      <input type="password" class="textbox" disabled={!encryptionEnabled} bind:value={password} />
+      <label for="password" class="option-label">password</label>
+      <input name="password" id="password" type="password" class="textbox" disabled={!encryptionEnabled} bind:value={password} />
     </div>
   </Module>
 </div>
