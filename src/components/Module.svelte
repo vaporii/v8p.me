@@ -3,10 +3,12 @@
 
   let {
     text,
-    children
+    children,
+    collapsable
   }: {
     text: string;
     children: Snippet<[]>;
+    collapsable?: boolean;
   } = $props();
 </script>
 
@@ -15,6 +17,9 @@
     {@render children()}
   </div>
   <div class="module-text">{text}</div>
+  {#if collapsable}
+    <button class="dropdown"><img src="/icons/dropdown.svg" alt="show/hide options icon"></button>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -42,5 +47,22 @@
     top: $module-text-top;
     left: $module-text-left;
     font-weight: bold;
+  }
+
+  .dropdown {
+    width: min-content;
+    height: 24px;
+    padding: 0;
+    margin: 0;
+    background-color: $bg-0;
+    margin-top: -1px;
+
+    position: absolute;
+    top: $module-text-top;
+    right: $module-text-left;
+  }
+
+  .dropdown img {
+    width: 30px;
   }
 </style>

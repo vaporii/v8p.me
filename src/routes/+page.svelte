@@ -268,7 +268,7 @@
       </div>
     </div>
   </Module>
-  <Module text="options">
+  <Module text="options" collapsable>
     <div class="options">
       <label class="option-label" for="encryption"
         >encryption<Help
