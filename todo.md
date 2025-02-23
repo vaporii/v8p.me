@@ -15,4 +15,4 @@
 - [ ] allow changing filename for text or like changing the language or something
 - [ ] properly render markdown with an option to switch between that and plaintext
 - [ ] let user retry decryption password without redownloading file
-- [ ] collapsable options menu (little arrow to very right that expands and collapses)
+- [x] collapsable options menu (little arrow to very right that expands and collapses)
