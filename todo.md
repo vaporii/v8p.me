@@ -9,7 +9,8 @@
 - [x] (?) thing on encryption screen
 - [x] actual error screens (no password, persistent storage alert)
 - [ ] option to just use RAM for large files (has a (?) that explains that it will speed it up, but it should only be used for smaller files)
-- [ ] expiration dates
+- [x] expiration dates
+- [ ] maybe add expiration date to file display
 - [ ] file linking to save server space
 - [ ] make readme better (add example .env file)
 - [ ] allow changing filename for text or like changing the language or something
