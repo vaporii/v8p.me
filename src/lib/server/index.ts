@@ -2,7 +2,7 @@ import fs from "fs";
 import type { Statements } from "$lib/types";
 
 export async function runBackgroundTasks(stmts: Statements) {
-  const files = stmts.getExpiredFiles.get();
+  const files = stmts.getExpiredFiles.all();
   if (!files) return;
 
   for (const file of files) {

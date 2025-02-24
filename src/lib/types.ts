@@ -26,7 +26,7 @@ export interface Statements {
     void
   >;
   getFileInfo: Statement<[alias: string], FileInfo>;
-  getExpiredFiles: Statement<[], FileInfo[]>;
+  getExpiredFiles: Statement<[], FileInfo>;
   deleteFile: Statement<[alias: string], void>;
 }
 

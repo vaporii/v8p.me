@@ -148,6 +148,9 @@
     xhr.setRequestHeader("X-File-Type", type.length === 0 ? "text/plain" : type);
     xhr.setRequestHeader("X-File-Size", size.toString());
     xhr.setRequestHeader("X-Encrypted", String(Number(encrypted)));
+    if (expirationDate > 0) {
+      xhr.setRequestHeader("X-Expiration-Date", expirationDate.toString());
+    }
 
     // NOTE: progress only works properly on chrome for some reason?
     // NOTE: maybe not
@@ -220,6 +223,25 @@
       acknowledge();
     }
   }
+
+  let expirationDateUnit = $state(0);
+  let expirationNumber: number = $state(0);
+  let expirationDate = $derived(expirationNumber * expirationDateUnit);
+
+  class Times {
+    second = 1;
+    minute = this.second * 60;
+    hour = this.minute * 60;
+    day = this.hour * 24;
+    week = this.day * 7;
+    month = this.day * 30.4375;
+    year = this.month * 12;
+    decade = this.year * 10;
+    century = this.decade * 10;
+    millennium = this.century * 10;
+  }
+
+  const times = new Times();
 </script>
 
 <svelte:window onkeyup={handleKeyUp} />
@@ -276,12 +298,48 @@
         /></label
       >
       <!-- NOTE: add a (?) note that tells the user it's client-side encrypted, the filename is not though -->
-      <button name="encryption" id="encryption" class="switch" onclick={toggleEncryption} aria-label="Toggle Encryption">
+      <button
+        name="encryption"
+        id="encryption"
+        class="switch"
+        onclick={toggleEncryption}
+        aria-label="Toggle Encryption"
+      >
         <div class={(encryptionEnabled ? "switch-active " : "") + "switch-circle"}></div>
       </button>
 
       <label for="password" class="option-label">password</label>
-      <input name="password" id="password" type="password" class="textbox" disabled={!encryptionEnabled} bind:value={password} />
+      <input
+        name="password"
+        id="password"
+        type="password"
+        class="textbox"
+        disabled={!encryptionEnabled}
+        bind:value={password}
+      />
+
+      <label for="expiry" class="option-label">expiry date</label>
+      <div class="expiry-wrapper">
+        <input
+          type="number"
+          name="expiry"
+          id="expiry"
+          bind:value={expirationNumber}
+          disabled={expirationDateUnit === 0}
+        />
+        <select name="dates" id="dates" bind:value={expirationDateUnit}>
+          <option value={times.minute}>minutes</option>
+          <option value={times.hour}>hours</option>
+          <option value={times.day}>days</option>
+          <option value={times.week}>weeks</option>
+          <option value={times.month}>months</option>
+          <option value={times.year}>years</option>
+          <option value={times.decade}>decades</option>
+          <option value={times.century}>centuries</option>
+          <option value={times.millennium}>millennia</option>
+          <option value={0}>none</option>
+        </select>
+      </div>
     </div>
   </Module>
 </div>
@@ -431,8 +489,15 @@
     display: grid;
 
     grid-template-rows: 1fr 1fr;
-    grid-template-columns: 0.6fr 1fr;
+    grid-template-columns: auto auto;
 
+    gap: $padding;
+  }
+
+  .expiry-wrapper {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr 40%;
     gap: $padding;
   }
 

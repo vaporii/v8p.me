@@ -24,5 +24,5 @@ export const statements: Statements = {
   ),
   getFileInfo: db.prepare("SELECT * FROM files WHERE alias=?"),
   getExpiredFiles: db.prepare("SELECT * FROM files WHERE expirationDate < strftime('%s', 'now') - 60"),
-  deleteFile: db.prepare("DELETE * FROM files WHERE alias=?")
+  deleteFile: db.prepare("DELETE FROM files WHERE alias=?")
 };
