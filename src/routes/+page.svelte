@@ -109,7 +109,11 @@
         return;
       }
 
-      await persistIfNeeded(thisFile.size);
+      if (!(await persistIfNeeded(thisFile.size))) {
+        popupText =
+          "persistent storage could not be enabled. some large files may not load properly or entirely";
+        displayingPopup = true;
+      }
 
       root = await navigator.storage.getDirectory();
       await tryRemoveFileEntry(root, "file_v8p.me");
@@ -276,17 +280,30 @@
         /></label
       >
       <!-- NOTE: add a (?) note that tells the user it's client-side encrypted, the filename is not though -->
-      <button name="encryption" id="encryption" class="switch" onclick={toggleEncryption} aria-label="Toggle Encryption">
+      <button
+        name="encryption"
+        id="encryption"
+        class="switch"
+        onclick={toggleEncryption}
+        aria-label="Toggle Encryption"
+      >
         <div class={(encryptionEnabled ? "switch-active " : "") + "switch-circle"}></div>
       </button>
 
       <label for="password" class="option-label">password</label>
-      <input name="password" id="password" type="password" class="textbox" disabled={!encryptionEnabled} bind:value={password} />
+      <input
+        name="password"
+        id="password"
+        type="password"
+        class="textbox"
+        disabled={!encryptionEnabled}
+        bind:value={password}
+      />
     </div>
   </Module>
 </div>
 
-<Popup text={popupText} bind:displaying={displayingPopup} bind:submit={acknowledge}></Popup>
+<Popup text={popupText} bind:displaying={displayingPopup} bind:submit={acknowledge} onCancel={cancelUpload}></Popup>
 
 <style lang="scss">
   @use "../vars" as *;
