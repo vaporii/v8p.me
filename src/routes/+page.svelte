@@ -148,7 +148,7 @@
     xhr.setRequestHeader("X-File-Type", type.length === 0 ? "text/plain" : type);
     xhr.setRequestHeader("X-File-Size", size.toString());
     xhr.setRequestHeader("X-Encrypted", String(Number(encrypted)));
-    if (expirationDate > 0) {
+    if (expirationDateUnit > 0 && expirationNumber > 0) {
       xhr.setRequestHeader("X-Expiration-Date", expirationDate.toString());
     }
 

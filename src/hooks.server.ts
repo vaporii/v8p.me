@@ -6,13 +6,17 @@ import { statements } from "$lib/server/database";
 import { runBackgroundTasks } from "$lib/server";
 env.config();
 
-export const init: ServerInit = async () => {
-  // delete expired files and run tasks every minute
-  await runBackgroundTasks(statements);
-  cron.schedule("* * * * *", async () => {
+// delete expired files and run tasks every minute
+cron.schedule(
+  "* * * * *",
+  async () => {
     await runBackgroundTasks(statements);
-  });
-};
+  },
+  { runOnInit: true }
+);
+
+// export const init: ServerInit = async () => {
+// };
 
 export const handle: Handle = async ({ event, resolve }) => {
   if (!event.locals.filesPath) {
