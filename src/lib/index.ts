@@ -194,8 +194,9 @@ export async function requestPersistentStorage() {
 export async function persistIfNeeded(size: number) {
   const quota = (await navigator.storage.estimate()).quota;
   if (!quota || size * 2 > quota) {
-    await requestPersistentStorage();
+    return await navigator.storage.persist();
   }
+  return true;
 }
 
 export const fileTypes: { ext: string; lang: LanguageType<string>; langName: string }[] = [

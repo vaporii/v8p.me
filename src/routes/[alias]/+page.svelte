@@ -33,7 +33,6 @@
 
   function handleKeypress(e: KeyboardEvent) {
     if (e.key !== "Enter") return;
-    console.log("click");
     button?.click();
   }
 
@@ -59,7 +58,11 @@
     let writable = await draftHandle.createWritable();
 
     buttonText = "waiting for storage...";
-    await persistIfNeeded(data.fileSize);
+    if (!(await persistIfNeeded(data.fileSize))) {
+      popupText =
+        "persistent storage could not be enabled. some large files may not load properly or entirely";
+      displayingPopup = true;
+    }
 
     const req = await fetch(`/${data.alias}/direct`);
     if (req.status === 404) {
@@ -107,6 +110,11 @@
       await encrypted.stream.pipeTo(writable);
     } catch (e) {
       if (e instanceof DOMException) {
+        if (e.message.includes("Quota exceeded")) {
+          popupText =
+            "storage quota exceeded! reset your permissions and reload to allow persistent storage";
+        }
+
         displayingPopup = true;
       }
       progressPercentage = 0;

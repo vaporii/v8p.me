@@ -1,13 +1,12 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import Module from "./Module.svelte";
 
   let {
     titleText,
     text,
     displaying = $bindable(),
-    onCancel = $bindable(),
-    onSubmit = $bindable(),
+    onCancel,
+    onSubmit,
     cancel = $bindable(),
     submit = $bindable()
   }: {
@@ -35,7 +34,7 @@
 
   async function keyPress(e: KeyboardEvent) {
     if (e.key === "Escape") {
-      cancel && await cancel();
+      cancel && (await cancel());
     }
   }
 </script>

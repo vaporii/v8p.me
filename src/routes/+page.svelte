@@ -109,7 +109,11 @@
         return;
       }
 
-      await persistIfNeeded(thisFile.size);
+      if (!(await persistIfNeeded(thisFile.size))) {
+        popupText =
+          "persistent storage could not be enabled. some large files may not load properly or entirely";
+        displayingPopup = true;
+      }
 
       root = await navigator.storage.getDirectory();
       await tryRemoveFileEntry(root, "file_v8p.me");
@@ -319,7 +323,6 @@
         disabled={!encryptionEnabled}
         bind:value={password}
       />
-
       <label for="expiry" class="option-label">expiry date</label>
       <div class="expiry-wrapper">
         <input
@@ -346,7 +349,7 @@
   </Module>
 </div>
 
-<Popup text={popupText} bind:displaying={displayingPopup} bind:submit={acknowledge}></Popup>
+<Popup text={popupText} bind:displaying={displayingPopup} bind:submit={acknowledge} onCancel={cancelUpload}></Popup>
 
 <style lang="scss">
   @use "../vars" as *;
