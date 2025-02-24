@@ -3,6 +3,9 @@ import type { Statements } from "$lib/types";
 import { convertDate } from "$lib";
 
 export async function runBackgroundTasks(stmts: Statements) {
+  const date = convertDate(Date.now());
+  console.log("running background tasks at", date.day, "at", date.time);
+
   const files = stmts.getExpiredFiles.all();
   if (!files) return;
 

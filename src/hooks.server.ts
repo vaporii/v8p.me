@@ -10,7 +10,6 @@ export const init: ServerInit = async () => {
   // delete expired files and run tasks every minute
   await runBackgroundTasks(statements);
   cron.schedule("* * * * *", async () => {
-    console.log("running!");
     await runBackgroundTasks(statements);
   });
 };
