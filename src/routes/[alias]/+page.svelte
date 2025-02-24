@@ -80,6 +80,11 @@
     await persistIfNeeded(data.fileSize);
 
     const req = await fetch(`/${data.alias}/direct`);
+    if (req.status === 404) {
+      popupText = "file was deleted!";
+      displayingPopup = true;
+    }
+    
     const stream = req.body;
     if (!stream) {
       buttonText = "failed";

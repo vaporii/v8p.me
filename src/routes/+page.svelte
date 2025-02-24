@@ -226,7 +226,9 @@
 
   let expirationDateUnit = $state(0);
   let expirationNumber: number = $state(0);
-  let expirationDate = $derived(expirationNumber * expirationDateUnit);
+  let expirationDate = $derived(
+    expirationNumber * expirationDateUnit + Math.floor(Date.now() / 1000)
+  );
 
   class Times {
     second = 1;

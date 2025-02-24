@@ -23,6 +23,6 @@ export const statements: Statements = {
     "INSERT INTO files(alias, fileName, timestamp, fileType, encrypted, filePath, fileSize, expirationDate) VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
   ),
   getFileInfo: db.prepare("SELECT * FROM files WHERE alias=?"),
-  getExpiredFiles: db.prepare("SELECT * FROM files WHERE expirationDate < strftime('%s', 'now') - 60"),
+  getExpiredFiles: db.prepare("SELECT * FROM files WHERE expirationDate < strftime('%s', 'now') + 60"),
   deleteFile: db.prepare("DELETE FROM files WHERE alias=?")
 };
