@@ -119,10 +119,21 @@ input[type="password"] {
   font-size: $password-font-size;
 }
 
-input[type="password"]:focus {
+input:focus {
   outline: $focus-outline;
 }
 
 .switch:focus {
+  outline: $focus-outline;
+}
+
+select {
+  font-size: $small-font-size;
+  padding-left: $smaller-padding;
+  height: 33px;
+  cursor: pointer;
+}
+
+select:focus {
   outline: $focus-outline;
 }

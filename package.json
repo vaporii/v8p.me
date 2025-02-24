@@ -17,9 +17,11 @@
     "@eslint/compat": "^1.2.5",
     "@eslint/js": "^9.18.0",
     "@sveltejs/adapter-auto": "^4.0.0",
+    "@sveltejs/adapter-node": "^5.2.12",
     "@sveltejs/kit": "^2.16.0",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@types/better-sqlite3": "^7.6.12",
+    "@types/node-cron": "^3.0.11",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-svelte": "^2.46.1",
@@ -37,6 +39,7 @@
     "@fontsource/jetbrains-mono": "^5.1.2",
     "better-sqlite3": "^11.8.1",
     "dotenv": "^16.4.7",
+    "node-cron": "^3.0.3",
     "svelte-highlight": "^7.8.2",
     "svelte-preprocess": "^6.0.3"
   }
