@@ -1,5 +1,6 @@
 import fs from "fs";
 import type { Statements } from "$lib/types";
+import { convertDate } from "$lib";
 
 export async function runBackgroundTasks(stmts: Statements) {
   const files = stmts.getExpiredFiles.all();
@@ -26,7 +27,7 @@ export async function runBackgroundTasks(stmts: Statements) {
           console.error(e);
         }
 
-        console.log("deleted file", file.alias);
+        console.log("deleted file", file.alias, file.filePath, "at", convertDate(Date.now()));
       },
       Math.max(1, file.expirationDate - Math.floor(Date.now() / 1000)) * 1000
     );
