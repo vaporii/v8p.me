@@ -6,7 +6,8 @@ export async function load({ params, locals }): Promise<FileInfo> {
     throw new Error("alias doesn't exist");
   }
 
-  const { alias, encrypted, fileName, filePath, fileType, timestamp, fileSize } = fileInfo;
+  const { alias, encrypted, fileName, filePath, fileType, timestamp, fileSize, expirationDate } =
+    fileInfo;
 
   return {
     alias,
@@ -15,6 +16,7 @@ export async function load({ params, locals }): Promise<FileInfo> {
     filePath,
     fileType,
     timestamp,
-    fileSize
+    fileSize,
+    expirationDate
   };
 }

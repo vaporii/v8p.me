@@ -20,18 +20,22 @@ function processHeaders(req: Request): ClientFileInfo {
   const fileType = req.headers.get("X-File-Type");
   const fileSize = req.headers.get("X-File-Size");
   const encrypted = req.headers.get("X-Encrypted");
+  const expirationDate = req.headers.get("X-Expiration-Date");
   if (!fileName) throw new Error("X-File-Name header missing");
   if (!fileType) throw new Error("X-File-Type header missing");
   if (!fileSize || isNaN(Number(fileSize)))
     throw new Error("X-File-Size header missing or invalid");
   if (!encrypted || isNaN(Number(encrypted)))
     throw new Error("X-Encrypted header missing or invalid");
+  if (expirationDate && isNaN(Number(expirationDate)))
+    throw new Error("X-Expiration-Date header invalid");
 
   return {
     fileName: decodeURIComponent(fileName),
     fileType,
     fileSize: Number(fileSize),
-    encrypted: Number(encrypted)
+    encrypted: Number(encrypted),
+    expirationDate: Number(expirationDate) || null
   };
 }
 
@@ -97,7 +101,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     clientHeaders.fileType,
     clientHeaders.encrypted,
     filePath,
-    clientHeaders.fileSize
+    clientHeaders.fileSize,
+    clientHeaders.expirationDate
   ); // TODO: implement basic caching, load some aliases into memory instead of getting from db each time
 
   return new Response(alias);

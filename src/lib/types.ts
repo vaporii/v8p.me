@@ -8,6 +8,7 @@ export interface FileInfo {
   encrypted: number;
   filePath: string;
   fileSize: number;
+  expirationDate: number | null;
 }
 
 export interface Statements {
@@ -19,11 +20,14 @@ export interface Statements {
       fileType: string,
       encrypted: number,
       filePath: string,
-      fileSize: number
+      fileSize: number,
+      expirationDate: number | null
     ],
     void
   >;
   getFileInfo: Statement<[alias: string], FileInfo>;
+  getExpiredFiles: Statement<[], FileInfo[]>;
+  deleteFile: Statement<[alias: string], void>;
 }
 
 export interface ClientFileInfo {
@@ -31,6 +35,7 @@ export interface ClientFileInfo {
   fileType: string;
   fileSize: number;
   encrypted: number;
+  expirationDate: number | null;
 }
 
 export interface Encrypted {
