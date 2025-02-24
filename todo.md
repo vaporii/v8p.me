@@ -11,7 +11,7 @@
 - [ ] option to just use RAM for large files (has a (?) that explains that it will speed it up, but it should only be used for smaller files)
 - [ ] expiration dates
 - [ ] file linking to save server space
-- [ ] make readme better
+- [ ] make readme better (add example .env file)
 - [ ] allow changing filename for text or like changing the language or something
 - [ ] properly render markdown with an option to switch between that and plaintext
 - [ ] let user retry decryption password without redownloading file
