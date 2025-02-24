@@ -272,3 +272,22 @@ export function isDisplayable(fileName: string, fileType?: string): boolean {
     })
   );
 }
+
+export function convertDate(inputDate: number) {
+  const date = new Date(inputDate);
+  const day = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  })
+    .format(date)
+    .toLowerCase();
+  const time = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true
+  })
+    .format(date)
+    .toLowerCase();
+  return { day, time };
+}

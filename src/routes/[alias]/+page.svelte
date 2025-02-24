@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    convertDate,
     Encryptor,
     formatSize,
     isDisplayable,
@@ -27,25 +28,6 @@
   let root: FileSystemDirectoryHandle;
 
   const encryptor = new Encryptor();
-
-  function convertDate(inputDate: number) {
-    const date = new Date(inputDate);
-    const day = new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric"
-    })
-      .format(date)
-      .toLowerCase();
-    const time = new Intl.DateTimeFormat("en-US", {
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true
-    })
-      .format(date)
-      .toLowerCase();
-    return { day, time };
-  }
 
   const date = convertDate(data.timestamp);
 
@@ -84,7 +66,7 @@
       popupText = "file was deleted!";
       displayingPopup = true;
     }
-    
+
     const stream = req.body;
     if (!stream) {
       buttonText = "failed";
