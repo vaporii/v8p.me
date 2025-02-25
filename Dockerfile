@@ -1,11 +1,12 @@
 FROM node:22
+RUN mkdir -p /usr/local/app/data/files && chown -R node:node /usr/local/app/data/files
 WORKDIR /usr/local/app
-RUN mkdir -p data/files
 
 COPY package*.json ./
+USER node
 RUN npm i
 
-COPY . .
+COPY --chown=node:node . .
 RUN npm run build
 RUN npm ci --omit dev
 
