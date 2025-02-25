@@ -1,6 +1,6 @@
 FROM node:22
-RUN mkdir -p /usr/local/app/data/files && chown -R node:node /usr/local/app/data/files
-WORKDIR /usr/local/app
+RUN mkdir -p /home/node/app/data/files && chown -R node:node /home/node/app/data/files
+WORKDIR /home/node/app
 
 COPY package*.json ./
 USER node
