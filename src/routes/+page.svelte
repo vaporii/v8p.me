@@ -349,7 +349,12 @@
   </Module>
 </div>
 
-<Popup text={popupText} bind:displaying={displayingPopup} bind:submit={acknowledge} onCancel={cancelUpload}></Popup>
+<Popup
+  text={popupText}
+  bind:displaying={displayingPopup}
+  bind:submit={acknowledge}
+  onCancel={cancelUpload}
+></Popup>
 
 <style lang="scss">
   @use "../vars" as *;
