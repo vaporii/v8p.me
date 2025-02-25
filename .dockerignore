@@ -1,0 +1,17 @@
+node_modules
+build
+files
+.svelte-kit
+.dockerignore
+.env.example
+.gitignore
+.prettierignore
+.prettierrc
+docker-compose.yml
+Dockerfile
+eslint.config.js
+*.db
+LICENSE
+README.md
+todo.md
+tsconfig.json
