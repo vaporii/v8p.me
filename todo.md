@@ -18,3 +18,4 @@
 - [ ] let user retry decryption password without redownloading file
 - [ ] better logging
 - [x] collapsable options menu (little arrow to very right that expands and collapses)
+- [ ] add page meta tags for embeds on social media
