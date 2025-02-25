@@ -1,0 +1,9 @@
+services:
+  v8p.me:
+    image: v8p.me
+    container_name: v8p.me
+    volumes:
+      - ./data:/usr/local/app/data
+    restart: unless-stopped
+    ports:
+      - 3000:3000

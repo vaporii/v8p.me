@@ -1,6 +1,6 @@
 FROM node:22
 WORKDIR /usr/local/app
-RUN mkdir -p files
+RUN mkdir -p data/files
 
 COPY package*.json ./
 RUN npm ci --omit dev
