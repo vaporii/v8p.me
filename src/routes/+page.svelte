@@ -228,12 +228,6 @@
     }
   }
 
-  let expirationDateUnit = $state(0);
-  let expirationNumber: number = $state(0);
-  let expirationDate = $derived(
-    expirationNumber * expirationDateUnit + Math.floor(Date.now() / 1000)
-  );
-
   class Times {
     second = 1;
     minute = this.second * 60;
@@ -246,8 +240,13 @@
     century = this.decade * 10;
     millennium = this.century * 10;
   }
-
   const times = new Times();
+
+  let expirationDateUnit = $state(times.week);
+  let expirationNumber: number = $state(1);
+  let expirationDate = $derived(
+    expirationNumber * expirationDateUnit + Math.floor(Date.now() / 1000)
+  );
 </script>
 
 <svelte:window onkeyup={handleKeyUp} />
