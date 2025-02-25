@@ -137,3 +137,15 @@ select {
 select:focus {
   outline: $focus-outline;
 }
+
+a {
+  color: $accent;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  padding-bottom: $padding;
+}
