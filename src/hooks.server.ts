@@ -15,9 +15,6 @@ cron.schedule(
   { runOnInit: true }
 );
 
-// export const init: ServerInit = async () => {
-// };
-
 export const handle: Handle = async ({ event, resolve }) => {
   if (!event.locals.filesPath) {
     if (!process.env.FILES_DIR) {

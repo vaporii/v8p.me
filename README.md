@@ -12,5 +12,5 @@ cd v8p.me
 mv .env.example .env
 npm i
 npm run build
-npm run preview --host
+node -r dotenv/config build
 ```
