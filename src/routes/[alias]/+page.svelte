@@ -148,9 +148,11 @@
     {#if data.fileType.startsWith("image")}
       <meta property="og:image" content={`/${data.alias}/direct`} />
       <meta property="og:image:type" content={data.fileType} />
+      <meta name="twitter:card" content="summary_large_image" />
     {:else if data.fileType.startsWith("video")}
       <meta property="og:video" content={`/${data.alias}/direct`} />
       <meta property="og:video:type" content={data.fileType} />
+      <meta name="twitter:card" content="player" />
     {/if}
   {:else}
     <meta property="og:title" content="encrypted file • v8p.me" />
