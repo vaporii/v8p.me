@@ -139,6 +139,32 @@
 
 <svelte:window on:beforeunload={beforeUnload} />
 
+<svelte:head>
+  <title>file - v8p.me</title>
+
+  {#if !data.encrypted}
+    <meta property="og:title" content={data.fileName + " • v8p.me"} />
+    <meta property="og:description" content={formatSize(data.fileSize) + " • " + data.fileType} />
+    {#if data.fileType.startsWith("image")}
+      <meta property="og:image" content={`/${data.alias}/direct`} />
+      <meta property="og:image:type" content={data.fileType} />
+    {:else if data.fileType.startsWith("video")}
+      <meta property="og:video" content={`/${data.alias}/direct`} />
+      <meta property="og:video:type" content={data.fileType} />
+    {/if}
+  {:else}
+    <meta property="og:title" content="encrypted file • v8p.me" />
+    <meta
+      property="og:description"
+      content="this content is encrypted. visit the site and enter a password to view"
+    />
+  {/if}
+
+  <meta property="og:url" content={"/" + data.alias} />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#458588" />
+</svelte:head>
+
 <div
   class={"center" +
     (isDisplayable(data.fileName, data.fileType) && !showDecryptScreen ? " display" : "")}

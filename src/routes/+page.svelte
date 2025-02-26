@@ -253,6 +253,12 @@
 
 <svelte:head>
   <title>v8p.me</title>
+
+  <meta property="og:title" content="v8p.me" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/" />
+  <meta property="og:description" content="file uploading, encrypting, storing, and sharing" />
+  <meta name="theme-color" content="#458588" />
 </svelte:head>
 
 <div class="center">
