@@ -145,7 +145,7 @@
     const xhr = new XMLHttpRequest();
     xhr.upload.addEventListener("progress", uploadProgressEvent);
 
-    xhr.open("POST", "/", true);
+    xhr.open("POST", "/api", true);
 
     xhr.setRequestHeader("Content-Type", "application/octet-stream");
     xhr.setRequestHeader("X-File-Name", encodeURIComponent(name));
