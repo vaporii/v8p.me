@@ -6,6 +6,15 @@
 
 <svelte:head>
   <title>page not found :(</title>
+
+  <title>file - v8p.me</title>
+
+  <meta property="og:title" content="file doesn't exist • v8p.me" />
+  <meta property="og:description" content="file either expired or doesn't exist" />
+
+  <meta property="og:url" content="." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#458588" />
 </svelte:head>
 
 <div class="wrapper">
