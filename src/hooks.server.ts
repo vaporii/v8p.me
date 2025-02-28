@@ -36,6 +36,22 @@ export const handle: Handle = async ({ event, resolve }) => {
     event.locals.stmts = statements;
   }
 
+  if (event.url.pathname.startsWith("/api")) {
+    if (event.request.method === "OPTIONS") {
+      return new Response(null, {
+        headers: {
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Headers": "*"
+        }
+      });
+    }
+  }
+
   const resp = await resolve(event);
+  if (event.url.pathname.startsWith("/api")) {
+    resp.headers.append("Access-Control-Allow-Origin", "*");
+  }
+
   return resp;
 };
