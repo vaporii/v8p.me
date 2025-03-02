@@ -1,6 +1,6 @@
 <script lang="ts">
   import "@fontsource/jetbrains-mono";
-  import "../app.scss";
+  import "../..app.scss";
 
   let { children } = $props();
 </script>
