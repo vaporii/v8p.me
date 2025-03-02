@@ -1,5 +1,11 @@
 @use "./vars" as *;
 
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
 body {
   background-color: $bg;
   font-family: $font;
@@ -140,12 +146,4 @@ select:focus {
 
 a {
   color: $accent;
-}
-
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  text-align: center;
-  padding-bottom: $padding;
 }

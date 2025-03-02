@@ -354,10 +354,6 @@
   </Module>
 </div>
 
-<div class="footer">
-  <span>by uploading a file, you agree to the <a href="/terms">terms of use</a></span>
-</div>
-
 <Popup
   text={popupText}
   bind:displaying={displayingPopup}
