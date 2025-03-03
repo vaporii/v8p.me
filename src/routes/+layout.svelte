@@ -1,6 +1,7 @@
 <script lang="ts">
   import "@fontsource/jetbrains-mono";
   import "../app.scss";
+  import { page } from "$app/state";
 
   let { children } = $props();
 </script>
@@ -9,14 +10,16 @@
   <main>
     {@render children()}
   </main>
-  <footer>
-    <div class="footer-text">
-      by uploading a file, you agree to the <a href="/terms">terms of use</a>
-    </div>
-    <div class="footer-text bottom">
-      <a href="https://github.com/vaporii/v8p.me">view source on github</a>
-    </div>
-  </footer>
+  {#if page.url.pathname === "/"}
+    <footer>
+      <div class="footer-text">
+        by uploading a file, you agree to the <a href="/terms">terms of use</a>
+      </div>
+      <div class="footer-text bottom">
+        <a href="https://github.com/vaporii/v8p.me">view source on github</a>
+      </div>
+    </footer>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -33,7 +36,7 @@
     height: 100%;
     width: 100%;
     position: relative;
-    overflow: scroll;
+    overflow: auto;
   }
 
   footer {
@@ -48,7 +51,7 @@
     width: 100%;
     text-align: center;
   }
-  
+
   .bottom {
     margin-bottom: $padding;
   }
