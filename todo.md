@@ -12,10 +12,10 @@
 - [x] expiration dates
 - [ ] maybe add expiration date to file display
 - [ ] file linking to save server space
-- [ ] make readme better (add example .env file)
+- [x] make readme better (add example .env file)
 - [ ] allow changing filename for text or like changing the language or something
 - [ ] properly render markdown with an option to switch between that and plaintext
 - [ ] let user retry decryption password without redownloading file
 - [ ] better logging
 - [x] collapsable options menu (little arrow to very right that expands and collapses)
-- [ ] add page meta tags for embeds on social media
+- [x] add page meta tags for embeds on social media
