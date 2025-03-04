@@ -70,14 +70,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const reader = request.body?.getReader();
   if (!reader) return new Response(null, { status: 400 });
 
-  // const db = locals.db;
-
   const fileName = generateRandomString(50);
   const filePath = path.join(locals.filesPath, fileName);
 
   try {
     await writeFile(filePath, reader);
   } catch (e) {
+    try {
+      fs.unlinkSync(filePath);
+    } catch (e) {
+      console.error("error unlinking file", e);
+    }
     console.error(e);
     return new Response("Unexpected error while writing file", { status: 500 });
   }
@@ -87,6 +90,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     clientHeaders = processHeaders(request);
   } catch (e) {
     if (e instanceof Error) {
+      try {
+        fs.unlinkSync(filePath);
+      } catch (e) {
+        console.error("error unlinking file", e);
+      }
       return new Response(e.message, { status: 400 });
     }
     throw e;
