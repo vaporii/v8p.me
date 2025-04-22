@@ -43,13 +43,13 @@
     version = "0.0.1";
     src = ../.;
 
-    buildInputs = [ pkgs.nodejs_22 ];
+    buildInputs = [ pkgs.nodejs ];
 
     buildPhase = ''
       runHook preBuild
 
-      ${pkgs.nodejs_22}/bin/npm i
-      ${pkgs.nodejs_22}/bin/npm build
+      npm i
+      npm build
 
       runHook postBuild
     '';
@@ -64,7 +64,7 @@
       cp package-lock.json $out/bin
 
       cd $out/bin
-      ${pkgs.nodejs_22}/bin/npm ci --omit dev
+      npm ci --omit dev
 
       runHook postInstall
     '';
