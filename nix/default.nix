@@ -50,8 +50,13 @@
     npmConfigHook = pkgs.importNpmLock.npmConfigHook;
 
     installPhase = ''
-      mkdir -p $out/build
-      cp -r build $out/build
+      mkdir -p $out/bin
+      cp -r build $out/bin
+
+      cp package.json $out/bin
+      cp package-lock.json $out/bin
+
+      ${pkgs.nodejs_22}/bin/npm ci --omit dev
     '';
   };
 in
@@ -62,7 +67,7 @@ pkgs.dockerTools.buildImage {
   # fromImage = nodeDocker;
 
   config = {
-    Cmd = [ "${pkgs.nodejs_22}/bin/node" "${v8pPkg}/build/build" ];
+    Cmd = [ "${pkgs.nodejs_22}/bin/node" "${v8pPkg}/bin/build" ];
   };
   
   copyToRoot = [ pkgs.nodejs_22 v8pPkg ];
