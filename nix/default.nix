@@ -62,7 +62,7 @@ pkgs.dockerTools.buildImage {
   # fromImage = nodeDocker;
 
   config = {
-    User = "node";
+    Cmd = [ "ls" "/" "&&" "ls" "/build" ];
   };
   
   copyToRoot = pkgs.buildEnv {
