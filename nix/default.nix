@@ -38,22 +38,25 @@
   #     runHook postInstall
   #   '';
   # };
-  v8pPkg = pkgs.buildNpmPackage {
-    pname = "v8p.me";
+  v8pPkg = pkgs.stdenv.mkDerivation {
+    name = "v8p.me";
     version = "0.0.1";
     src = ../.;
 
-    npmDeps = pkgs.importNpmLock {
-      npmRoot = ../.;
-    };
+    buildInputs = [ pkgs.nodejs_22 ];
 
-    npmConfigHook = pkgs.importNpmLock.npmConfigHook;
+    buildPhase = ''
+      runHook preBuild
 
-    extraCommands = ''
-      mkdir -p var/lib/v8p.me/files
+      ${pkgs.nodejs_22}/bin/npm i
+      ${pkgs.nodejs_22}/bin/npm build
+
+      runHook postBuild
     '';
 
     installPhase = ''
+      runHook preInstall
+
       mkdir -p $out/bin
       cp -r build $out/bin
 
@@ -62,6 +65,8 @@
 
       cd $out/bin
       ${pkgs.nodejs_22}/bin/npm ci --omit dev
+
+      runHook postInstall
     '';
   };
 in
