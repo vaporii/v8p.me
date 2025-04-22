@@ -60,7 +60,8 @@
       cp package.json $out/bin
       cp package-lock.json $out/bin
 
-      cp -r node_modules $out/bin
+      cd $out/bin
+      ${pkgs.nodejs_22}/bin/npm ci --omit dev
     '';
   };
 in
