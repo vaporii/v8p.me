@@ -62,7 +62,7 @@ pkgs.dockerTools.buildImage {
   # fromImage = nodeDocker;
 
   config = {
-    Cmd = [ "ls" "/" "&&" "ls" "/build" ];
+    Cmd = [ "${pkgs.nodejs_22}" "/build" ];
   };
   
   copyToRoot = pkgs.buildEnv {
