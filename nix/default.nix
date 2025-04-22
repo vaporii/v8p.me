@@ -62,12 +62,8 @@ pkgs.dockerTools.buildImage {
   # fromImage = nodeDocker;
 
   config = {
-    Cmd = [ "${pkgs.nodejs_22}" "/build" ];
+    Cmd = [ "${pkgs.nodejs_22}"/bin/node "${v8pPkg}/build/build" ];
   };
   
-  copyToRoot = pkgs.buildEnv {
-    name = "v8p.me-root";
-    paths = [ pkgs.nodejs_22 v8pPkg pkgs.coreutils ];
-    pathsToLink = [ "/bin" ];
-  };
+  copyToRoot = [ pkgs.nodejs_22 v8pPkg ];
 }
