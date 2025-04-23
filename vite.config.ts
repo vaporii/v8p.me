@@ -12,7 +12,11 @@ const noExternal = dependencies;
 
 export default defineConfig({
   plugins: [sveltekit()],
-  ssr: {
-    noExternal
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
   }
 });
