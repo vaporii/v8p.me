@@ -25,7 +25,7 @@ pkgs.dockerTools.buildImage {
   fromImageTag = "22";
 
   config = {
-    Cmd = [ "node" "/bin/v8p.me/build" ];
+    Cmd = [ "/usr/bin/local/node" "/bin/v8p.me/build" ];
   };
 
   copyToRoot = pkgs.buildEnv {
