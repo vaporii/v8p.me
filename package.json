@@ -37,7 +37,6 @@
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.1.2",
-    "better-sqlite3": "^11.8.1",
     "dotenv": "^16.4.7",
     "node-cron": "^3.0.3",
     "svelte-highlight": "^7.8.2",
