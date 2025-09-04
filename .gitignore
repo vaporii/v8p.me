@@ -23,6 +23,7 @@ Thumbs.db
 
 # Files
 files
+data/
 
 # Vite
 vite.config.js.timestamp-*
