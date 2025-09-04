@@ -15,8 +15,9 @@
 
 <div class="popup" style={`left: ${left}px; top: ${top}px;`}>
   <div class="arrow"></div>
-  <div class="cover"></div>
-  <span class="text">{text}</span>
+  <div class="cover">
+    <span class="text">{text}</span>
+  </div>
 </div>
 
 <style lang="scss">
@@ -31,7 +32,6 @@
   }
 
   .popup {
-    visibility: hidden;
     position: absolute;
     top: 0;
     left: 0;
@@ -42,14 +42,16 @@
     z-index: 3;
     opacity: 0%;
     translate: 0 20px;
-    transition: all $transition-duration;
+    scale: 0%;
+    transition: scale 0ms $transition-duration, opacity $transition-duration 0ms, translate $transition-duration;
   }
 
-  img:hover ~ div {
-    visibility: visible;
+  img:hover ~ .popup {
     display: block;
     opacity: 100%;
     translate: 0 0px;
+    scale: 100%;
+    transition: scale 0ms 0ms, opacity $transition-duration 0ms, translate $transition-duration;
   }
 
   .arrow {
@@ -65,18 +67,17 @@
 
   .cover {
     width: 100%;
-    height: 35px;
+    height: 100%;
     position: absolute;
-    bottom: 0;
+    top: 0;
     background-color: $bg-0;
+    text-align: center;
+    padding: 15px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .text {
-    position: absolute;
-    top: 17px;
-    left: 20px;
-    width: 346px;
-    height: 63px;
     font-size: 16px;
     color: $fg-1;
   }

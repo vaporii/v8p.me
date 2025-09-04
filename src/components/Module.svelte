@@ -72,7 +72,7 @@
   }
   
   .collapsed {
-    margin-top: -145px;
+    margin-top: -184px;
   }
 
   .module-text {
