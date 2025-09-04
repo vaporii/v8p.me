@@ -116,17 +116,9 @@ export class Encryptor {
     );
 
     const derivedKey = await window.crypto.subtle.deriveKey(
-      {
-        name: "PBKDF2",
-        iterations,
-        hash: "SHA-256",
-        salt: new Uint8Array(salt),
-      },
+      { name: "PBKDF2", iterations, hash: "SHA-256", salt: new Uint8Array(salt) },
       baseKey,
-      {
-        name: "AES-GCM",
-        length: 256
-      },
+      { name: "AES-GCM", length: 256 },
       false,
       ["encrypt", "decrypt"]
     );
@@ -135,13 +127,7 @@ export class Encryptor {
   }
 }
 
-const M = {
-  B: 1,
-  KB: 1000,
-  MB: 1000000,
-  GB: 1000000000,
-  TB: 1000000000000
-};
+const M = { B: 1, KB: 1000, MB: 1000000, GB: 1000000000, TB: 1000000000000 };
 
 export function formatSize(bytes: number): string {
   let formatted = 0.0;
@@ -176,7 +162,7 @@ export async function tryRemoveFileEntry(
   entry: string
 ): Promise<boolean> {
   try {
-    await root.removeEntry(entry);
+    await root.removeEntry(entry, { recursive: true });
     return true;
   } catch {
     return false;
@@ -276,11 +262,7 @@ export function isDisplayable(fileName: string, fileType?: string): boolean {
 
 export function convertDate(inputDate: number) {
   const date = new Date(inputDate);
-  const day = new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric"
-  })
+  const day = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" })
     .format(date)
     .toLowerCase();
   const time = new Intl.DateTimeFormat("en-US", {

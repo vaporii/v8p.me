@@ -54,7 +54,8 @@
 
     root = await navigator.storage.getDirectory();
     await tryRemoveFileEntry(root, "file_v8p.me");
-    const draftHandle = await root.getFileHandle("file_v8p.me", { create: true });
+    const dirHandle = await root.getDirectoryHandle("file_v8p.me", { create: true });
+    const draftHandle = await dirHandle.getFileHandle(data.fileName, { create: true });
     let writable = await draftHandle.createWritable();
 
     buttonText = "waiting for storage...";
