@@ -1,6 +1,13 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { Encryptor, formatSize, persistIfNeeded, roundToDecimal, tryRemoveFileEntry } from "$lib";
+  import {
+    Encryptor,
+    fileTypes,
+    formatSize,
+    persistIfNeeded,
+    roundToDecimal,
+    tryRemoveFileEntry
+  } from "$lib";
   import type { Encrypted } from "$lib/types";
   import Module from "../components/Module.svelte";
   import Help from "../components/Help.svelte";
@@ -87,7 +94,9 @@
     if (file) {
       thisFile = file;
     } else if (text.length > 0) {
-      thisFile = new File([new TextEncoder().encode(text)], "text.txt", { type: "text/plain" });
+      thisFile = new File([new TextEncoder().encode(text)], `file.${highlightingLanguage}`, {
+        type: "text/plain"
+      });
     } else return; // TODO: error for not having file or text
 
     const name = thisFile.name;
@@ -247,6 +256,8 @@
   let expirationDate = $derived(
     expirationNumber * expirationDateUnit + Math.floor(Date.now() / 1000)
   );
+
+  let highlightingLanguage = $derived(!!file ? "binary" : "txt");
 </script>
 
 <svelte:window onkeyup={handleKeyUp} />
@@ -350,6 +361,17 @@
           <option value={0}>none</option>
         </select>
       </div>
+      <label for="language" class="option-label"
+        >language<Help
+          text="set the language to control how written text is displayed in the file preview page."
+        /></label
+      >
+      <select name="langs" id="langs" bind:value={highlightingLanguage} disabled={!!file}>
+        {#each fileTypes as fileType}
+          <option value={fileType.ext}>{fileType.langName} (.{fileType.ext})</option>
+        {/each}
+        <option value="binary">file</option>
+      </select>
     </div>
   </Module>
 </div>

@@ -51,7 +51,7 @@
 
   .wrapper {
     max-height: 50vh;
-    overflow: scroll;
+    overflow: auto;
   }
 
   .copy {
@@ -78,7 +78,7 @@
   }
 
   .inner-wrapper {
-    width: max-content;
+    width: 100%;
   }
 
   .lang-name {
