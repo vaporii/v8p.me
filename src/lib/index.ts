@@ -118,9 +118,9 @@ export class Encryptor {
     const derivedKey = await window.crypto.subtle.deriveKey(
       {
         name: "PBKDF2",
-        salt,
         iterations,
-        hash: "SHA-256"
+        hash: "SHA-256",
+        salt: new Uint8Array(salt),
       },
       baseKey,
       {
