@@ -12,6 +12,16 @@
   in {
     packages.${system}.default = (import ./nix { inherit pkgs; });
 
+    devShells.${system}.default = pkgs.mkShell {
+      packages = [
+        pkgs.nodejs_latest
+      ];
+
+      shellHook = ''
+        ${pkgs.nodejs}/bin/npm install
+      '';
+    };
+
     # nixosModules.default = self.nixosModules."v8p.me";
     # nixosModules."v8p.me" = import ./nix/nixos.nix inputs;
   };
