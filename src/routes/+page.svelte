@@ -269,8 +269,11 @@
       file = thisFile;
       fileName = file.name;
       fileSize = formatSize(file.size);
-      // iconSrc = "/icons/file.svg";
-      iconSrc = URL.createObjectURL(thisFile);
+      if (file.type.startsWith("image/")) {
+        iconSrc = URL.createObjectURL(thisFile);
+      } else {
+        iconSrc = "/icons/file.svg";
+      }
       return;
     }
   }
@@ -301,7 +304,14 @@
         ondragenter={dragEnterHandler}
         ondragleave={dragLeaveHandler}
       >
-        <img src={iconSrc} style={iconSrc.endsWith(".svg") ? "" : "width: auto; height: auto; max-width: 100%; max-height: 200px;"} alt="upload file icon" class="upload-icon" />
+        <img
+          src={iconSrc}
+          style={iconSrc.endsWith(".svg")
+            ? ""
+            : "width: auto; height: auto; max-width: 100%; max-height: 200px;"}
+          alt="upload file icon"
+          class="upload-icon"
+        />
         <span class="big-text">{fileName}</span>
         <span class="little-text">{fileSize}</span>
       </label>
