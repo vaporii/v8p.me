@@ -258,9 +258,25 @@
   );
 
   let highlightingLanguage = $derived(!!file ? "binary" : "txt");
+
+  async function handlePaste(e: ClipboardEvent) {
+    for (const item of e.clipboardData?.items ?? []) {
+      if (item.kind === "string") continue;
+
+      const thisFile = item.getAsFile();
+      if (!thisFile) continue;
+
+      file = thisFile;
+      fileName = file.name;
+      fileSize = formatSize(file.size);
+      // iconSrc = "/icons/file.svg";
+      iconSrc = URL.createObjectURL(thisFile);
+      return;
+    }
+  }
 </script>
 
-<svelte:window onkeyup={handleKeyUp} />
+<svelte:window onpaste={handlePaste} onkeyup={handleKeyUp} />
 
 <svelte:head>
   <title>v8p.me</title>
@@ -285,7 +301,7 @@
         ondragenter={dragEnterHandler}
         ondragleave={dragLeaveHandler}
       >
-        <img src={iconSrc} alt="upload file icon" class="upload-icon" />
+        <img src={iconSrc} style={iconSrc.endsWith(".svg") ? "" : "width: auto; height: auto; max-width: 100%; max-height: 200px;"} alt="upload file icon" class="upload-icon" />
         <span class="big-text">{fileName}</span>
         <span class="little-text">{fileSize}</span>
       </label>
