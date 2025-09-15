@@ -45,9 +45,7 @@
     const target = e.target as HTMLInputElement;
     if (target.files && target.files.length > 0) {
       file = target.files[0];
-      fileName = file.name;
-      fileSize = formatSize(file.size);
-      iconSrc = "/icons/file.svg";
+      setImagePreview();
     }
   }
 
@@ -197,8 +195,20 @@
       if (e.dataTransfer.items[0].kind !== "file") return;
       file = e.dataTransfer.items[0].getAsFile() as File;
 
-      fileName = file.name;
-      fileSize = formatSize(file.size);
+      setImagePreview();
+    }
+  }
+
+  function setImagePreview() {
+    if (!file) {
+      return;
+    }
+
+    fileName = file.name;
+    fileSize = formatSize(file.size);
+    if (file.type.startsWith("image/")) {
+      iconSrc = URL.createObjectURL(file);
+    } else {
       iconSrc = "/icons/file.svg";
     }
   }
@@ -267,13 +277,8 @@
       if (!thisFile) continue;
 
       file = thisFile;
-      fileName = file.name;
-      fileSize = formatSize(file.size);
-      if (file.type.startsWith("image/")) {
-        iconSrc = URL.createObjectURL(thisFile);
-      } else {
-        iconSrc = "/icons/file.svg";
-      }
+
+      setImagePreview();
       return;
     }
   }
