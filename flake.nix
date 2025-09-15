@@ -15,6 +15,7 @@
     devShells.${system}.default = pkgs.mkShell {
       packages = [
         pkgs.nodejs_latest
+        pkgs.python3
       ];
 
       shellHook = ''
