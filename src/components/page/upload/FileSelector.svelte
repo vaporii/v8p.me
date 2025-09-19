@@ -2,7 +2,7 @@
   import { formatSize } from "$lib";
 
   let {
-    files = $bindable(null)
+    files = $bindable()
   }: {
     files: FileList | null | undefined;
   } = $props();
@@ -75,6 +75,18 @@
     <span class="subtitle">{fileDetails.subtitle}</span>
   </label>
 </div>
+
+<svelte:window
+  onpaste={(e) => {
+    const transfer = new DataTransfer();
+
+    const file = e.clipboardData?.files.item(0);
+    if (file) {
+      transfer.items.add(file);
+      files = transfer.files;
+    }
+  }}
+/>
 
 <style lang="scss">
   @use "../../../vars" as *;

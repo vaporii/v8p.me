@@ -10,11 +10,10 @@
 
   $effect(() => {
     file = files?.item(0) || undefined;
+    console.log(file);
   });
 
   let files: FileList | null | undefined = $state(undefined);
 </script>
 
-<Module text="upload file">
-  <FileSelector {files} />
-</Module>
+<FileSelector {files} />

@@ -12,13 +12,16 @@
   import Module from "../components/Module.svelte";
   import Help from "../components/Help.svelte";
   import Popup from "../components/Popup.svelte";
+  import UploadFile from "../components/page/upload/UploadFile.svelte";
+  import WriteText from "../components/page/upload/WriteText.svelte";
+  import FileSelector from "../components/page/upload/FileSelector.svelte";
+  import { upload } from "$lib/uploader";
+
+  // let uploadingState
 
   let buttonDisabled = $state(false);
 
   let encryptionEnabled = $state(false);
-  let fileName = $state("drop file here");
-  let fileSize = $state("or, click to choose");
-  let iconSrc = $state("/icons/upload.svg");
   let buttonText = $state("upload file or text");
   let text = $state("");
   let password = $state("");
@@ -29,7 +32,7 @@
 
   let dragging = $state(false);
 
-  let file: File | undefined = $state();
+  let files: FileList | undefined | null = $state();
 
   const encryptor = new Encryptor();
 
@@ -41,23 +44,11 @@
     encryptionEnabled = !encryptionEnabled;
   }
 
-  function handleFileChange(e: Event) {
-    const target = e.target as HTMLInputElement;
-    if (target.files && target.files.length > 0) {
-      file = target.files[0];
-      setImagePreview();
-    }
-  }
-
   async function cancelUpload(removeFile?: boolean) {
     await stopUploadOrEncrypt();
 
     if (removeFile) {
-      fileName = "drop file here";
-      fileSize = "or, click to choose";
-      iconSrc = "/icons/upload.svg";
-
-      file = undefined;
+      files = undefined;
       text = "";
     }
 
@@ -71,165 +62,28 @@
     cancelUpload(true);
   }
 
-  function uploadProgressEvent(progress: ProgressEvent<XMLHttpRequestEventTarget>) {
-    if (progress.lengthComputable) {
-      progressPercentage = (progress.loaded / progress.total) * 100;
-      buttonText = `uploading file... ${roundToDecimal(progressPercentage, 2)}%`;
-    }
-  }
-
-  async function encryptFile(blob: Blob, password: string): Promise<Encrypted> {
-    const encrypted = await encryptor.encrypt(blob, password, (loaded, total) => {
-      buttonText = `encrypting file... ${roundToDecimal((loaded / total) * 100, 2)}%`;
-      progressPercentage = (loaded / total) * 100;
-    });
-
-    return encrypted;
-  }
-
   async function uploadFile() {
-    let thisFile: File;
-    if (file) {
-      thisFile = file;
-    } else if (text.length > 0) {
-      thisFile = new File([new TextEncoder().encode(text)], `file.${highlightingLanguage}`, {
-        type: "text/plain"
-      });
-    } else return; // TODO: error for not having file or text
+    const file = files?.item(0);
+    if (!file) return;
 
-    const name = thisFile.name;
-    const type = thisFile.type;
-    const size = thisFile.size;
-    const encrypted = encryptionEnabled;
-
-    let root: FileSystemDirectoryHandle | undefined;
-
-    buttonDisabled = true;
-    buttonText = "starting...";
-
-    if (encryptionEnabled) {
-      if (password.length === 0) {
-        popupText = "password empty :(";
-        displayingPopup = true;
-
-        await cancelUpload();
-        return;
-      }
-
-      if (!(await persistIfNeeded(thisFile.size))) {
-        popupText =
-          "persistent storage could not be enabled. some large files may not load properly or entirely";
-        displayingPopup = true;
-      }
-
-      root = await navigator.storage.getDirectory();
-      await tryRemoveFileEntry(root, "file_v8p.me");
-
-      const draftHandle = await root.getFileHandle("file_v8p.me", { create: true });
-      const writable = await draftHandle.createWritable();
-
-      const stream = await encryptFile(thisFile, password);
-      stopUploadOrEncrypt = async () => {
-        stream.cancel();
-      };
-
-      try {
-        await stream.stream.pipeTo(writable);
-      } catch (e) {
-        if (e) {
-          console.error(e);
-          alert("error encrypting file. you probably don't have enough space on your drive"); // TODO: replace with an actual error
-        }
-        await cancelUpload();
-        return;
-      }
-
-      thisFile = await draftHandle.getFile();
-    } else {
-      await persistIfNeeded(thisFile.size);
-    }
-
-    const xhr = new XMLHttpRequest();
-    xhr.upload.addEventListener("progress", uploadProgressEvent);
-
-    xhr.open("POST", "/api", true);
-
-    xhr.setRequestHeader("Content-Type", "application/octet-stream");
-    xhr.setRequestHeader("X-File-Name", encodeURIComponent(name));
-    xhr.setRequestHeader("X-File-Type", type.length === 0 ? "text/plain" : type);
-    xhr.setRequestHeader("X-File-Size", size.toString());
-    xhr.setRequestHeader("X-Encrypted", String(Number(encrypted)));
-    if (expirationDateUnit > 0 && expirationNumber > 0) {
-      xhr.setRequestHeader("X-Expiration-Date", expirationDate.toString());
-    }
-
-    // NOTE: progress only works properly on chrome for some reason?
-    // NOTE: maybe not
-    xhr.send(thisFile);
-
-    stopUploadOrEncrypt = async () => {
-      xhr.abort();
-      root?.removeEntry("file_v8p.me");
-    };
-
-    xhr.addEventListener("readystatechange", (e) => {
-      if (xhr.readyState === XMLHttpRequest.DONE) {
-        root?.removeEntry("file_v8p.me");
-        if (xhr.status >= 200 && xhr.status < 400) {
-          buttonText = "uploaded!";
-          goto(xhr.responseText);
+    console.log(file);
+    console.log(password);
+    const url = await upload({
+      file,
+      encrypt: encryptionEnabled,
+      expirationDate: expirationDate,
+      password: password,
+      onProgress(phase, percent) {
+        progressPercentage = percent;
+        if (phase === "encrypting") {
+          buttonText = `encrypting... ${roundToDecimal(percent, 2)}%`;
         } else {
-          buttonText = "failed";
+          buttonText = `uploading... ${roundToDecimal(percent, 2)}%`;
         }
       }
     });
-  }
 
-  // janky fix for javascript's shitty drag and drop api
-  let enterTarget: EventTarget | null;
-  function dropHandler(e: DragEvent) {
-    e.preventDefault();
-    dragging = false;
-
-    if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
-      if (e.dataTransfer.items[0].kind !== "file") return;
-      file = e.dataTransfer.items[0].getAsFile() as File;
-
-      setImagePreview();
-    }
-  }
-
-  function setImagePreview() {
-    if (!file) {
-      return;
-    }
-
-    fileName = file.name;
-    fileSize = formatSize(file.size);
-    if (file.type.startsWith("image/")) {
-      iconSrc = URL.createObjectURL(file);
-    } else {
-      iconSrc = "/icons/file.svg";
-    }
-  }
-
-  function dragOverHandler(e: DragEvent) {
-    e.preventDefault();
-  }
-
-  function dragEnterHandler(e: Event) {
-    enterTarget = e.target;
-    e.stopPropagation();
-    e.preventDefault();
-    dragging = true;
-  }
-
-  function dragLeaveHandler(e: Event) {
-    if (enterTarget === e.target) {
-      e.stopPropagation();
-      e.preventDefault();
-      dragging = false;
-    }
+    goto(url);
   }
 
   let acknowledge: () => any = $state(() => {});
@@ -267,24 +121,10 @@
     expirationNumber * expirationDateUnit + Math.floor(Date.now() / 1000)
   );
 
-  let highlightingLanguage = $derived(!!file ? "binary" : "txt");
-
-  async function handlePaste(e: ClipboardEvent) {
-    for (const item of e.clipboardData?.items ?? []) {
-      if (item.kind === "string") continue;
-
-      const thisFile = item.getAsFile();
-      if (!thisFile) continue;
-
-      file = thisFile;
-
-      setImagePreview();
-      return;
-    }
-  }
+  let highlightingLanguage = $derived(!!files?.item(0) ? "binary" : "txt");
 </script>
 
-<svelte:window onpaste={handlePaste} onkeyup={handleKeyUp} />
+<svelte:window onkeyup={handleKeyUp} />
 
 <svelte:head>
   <title>v8p.me</title>
@@ -299,39 +139,17 @@
 <div class="center">
   <Module text="upload file">
     <div class="upload-file">
-      <input type="file" name="file-upload" id="file-upload" onchange={handleFileChange} />
-      <label
-        id="file-select"
-        class={dragging ? "dragging" : ""}
-        for="file-upload"
-        ondrop={dropHandler}
-        ondragover={dragOverHandler}
-        ondragenter={dragEnterHandler}
-        ondragleave={dragLeaveHandler}
-      >
-        <img
-          src={iconSrc}
-          style={iconSrc.endsWith(".svg")
-            ? ""
-            : "width: auto; height: auto; max-width: 100%; max-height: 200px;"}
-          alt="upload file icon"
-          class="upload-icon"
-        />
-        <span class="big-text">{fileName}</span>
-        <span class="little-text">{fileSize}</span>
-      </label>
+      <FileSelector bind:files></FileSelector>
+      <!-- <UploadFile {file}></UploadFile> -->
+
       <div class="or-separator">
         <span class="or-line"></span>
         <span class="or-text">OR</span>
         <span class="or-line"></span>
       </div>
-      <textarea
-        name="text"
-        id="text"
-        placeholder="write some text..."
-        disabled={!!file}
-        bind:value={text}
-      ></textarea>
+
+      <WriteText disabled={!!files?.item(0)} bind:text></WriteText>
+
       <div class="bottom-buttons">
         <button class="cancel" onclick={cancelUploadButton}>cancel</button>
         <button class="upload" onclick={uploadFile} disabled={buttonDisabled}>
@@ -397,7 +215,7 @@
           text="set the language to control how written text is displayed in the file preview page."
         /></label
       >
-      <select name="langs" id="langs" bind:value={highlightingLanguage} disabled={!!file}>
+      <select name="langs" id="langs" bind:value={highlightingLanguage} disabled={!!files?.item(0)}>
         {#each fileTypes as fileType}
           <option value={fileType.ext}>{fileType.langName} (.{fileType.ext})</option>
         {/each}
@@ -430,22 +248,6 @@
     position: relative;
   }
 
-  #file-select {
-    display: flex;
-
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-
-    width: 100%;
-    min-height: 170px;
-    padding: $padding;
-
-    background-color: $bg-0-soft;
-    cursor: pointer;
-  }
-
   .dragging {
     border: $drag-border;
   }
@@ -476,17 +278,6 @@
     color: $bg-4;
   }
 
-  #file-upload {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-
-  #file-upload:focus ~ #file-select {
-    outline: $focus-outline;
-  }
-
   .or-separator {
     display: flex;
 
@@ -508,12 +299,6 @@
 
     font-weight: bold;
     color: $bg-3;
-  }
-
-  textarea {
-    width: 100%;
-    height: 170px;
-    margin-bottom: $padding;
   }
 
   .bottom-buttons {
