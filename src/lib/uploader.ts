@@ -63,6 +63,7 @@ export async function upload({
 
         signal.onabort = () => {
           stream.cancel();
+          reject(signal.reason);
         };
 
         await stream.stream.pipeTo(writable);
@@ -97,10 +98,10 @@ export async function upload({
 
       xhr.send(workingFile);
 
-      signal.onabort = () => {
+      signal.onabort = (e) => {
         xhr.abort();
         root?.removeEntry("file_v8p.me");
-        reject();
+        reject(signal.reason);
       };
 
       xhr.addEventListener("loadstart", (e) => {
@@ -114,6 +115,7 @@ export async function upload({
             stateChange("upload_complete");
             resolve(xhr.responseText);
           } else {
+            signal.throwIfAborted();
             stateChange("end");
             onError(new Error(xhr.statusText));
             reject(new Error(xhr.statusText));

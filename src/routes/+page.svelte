@@ -17,7 +17,7 @@
   import FileSelector from "../components/page/upload/FileSelector.svelte";
   import { upload } from "$lib/uploader";
 
-  // let uploadingState
+  let abortController = new AbortController();
 
   let buttonDisabled = $state(false);
 
@@ -30,58 +30,46 @@
   let popupText = $state("");
   let displayingPopup = $state(false);
 
-  let dragging = $state(false);
-
   let files: FileList | undefined | null = $state();
-
-  const encryptor = new Encryptor();
-
-  // function to stop uploading or encrypting at whatever step
-  // set in encryption and uploading functions
-  let stopUploadOrEncrypt = async () => {};
 
   function toggleEncryption() {
     encryptionEnabled = !encryptionEnabled;
   }
 
-  async function cancelUpload(removeFile?: boolean) {
-    await stopUploadOrEncrypt();
-
-    if (removeFile) {
-      files = undefined;
-      text = "";
-    }
-
-    buttonText = "upload file or text";
-    progressPercentage = 0;
-
-    buttonDisabled = false;
-  }
-
   function cancelUploadButton() {
-    cancelUpload(true);
+    abortController.abort(new Error("upload file or text"));
+    files = new DataTransfer().files;
+    text = "";
   }
 
   async function uploadFile() {
-    const file = files?.item(0);
-    if (!file) return;
+    let file = files?.item(0);
+    if (!file) {
+      if (text.length === 0) return;
+      file = new File([text], `file.${highlightingLanguage}`);
+    };
 
-    console.log(file);
-    console.log(password);
-    const url = await upload({
-      file,
-      encrypt: encryptionEnabled,
-      expirationDate: expirationDate,
-      password: password,
-      onProgress(phase, percent) {
-        progressPercentage = percent;
-        if (phase === "encrypting") {
-          buttonText = `encrypting... ${roundToDecimal(percent, 2)}%`;
-        } else {
-          buttonText = `uploading... ${roundToDecimal(percent, 2)}%`;
-        }
+    let url = "";
+    try {
+      abortController = new AbortController();
+
+      url = await upload({
+        file,
+        encrypt: encryptionEnabled,
+        expirationDate: expirationDate,
+        password: password,
+        onProgress(phase, percent) {
+          progressPercentage = percent;
+          buttonText = `${phase}... ${roundToDecimal(percent, 2)}%`;
+        },
+        abortController
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        progressPercentage = 0.0;
+        buttonText = e.message;
       }
-    });
+    }
 
     goto(url);
   }
@@ -229,7 +217,7 @@
   text={popupText}
   bind:displaying={displayingPopup}
   bind:submit={acknowledge}
-  onCancel={cancelUpload}
+  onCancel={cancelUploadButton}
 ></Popup>
 
 <style lang="scss">
