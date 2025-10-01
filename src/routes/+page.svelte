@@ -1,18 +1,9 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import {
-    Encryptor,
-    fileTypes,
-    formatSize,
-    persistIfNeeded,
-    roundToDecimal,
-    tryRemoveFileEntry
-  } from "$lib";
-  import type { Encrypted } from "$lib/types";
+  import { fileTypes, roundToDecimal } from "$lib";
   import Module from "../components/Module.svelte";
   import Help from "../components/Help.svelte";
   import Popup from "../components/Popup.svelte";
-  import UploadFile from "../components/page/upload/UploadFile.svelte";
   import WriteText from "../components/page/upload/WriteText.svelte";
   import FileSelector from "../components/page/upload/FileSelector.svelte";
   import { upload } from "$lib/uploader";
@@ -47,7 +38,7 @@
     if (!file) {
       if (text.length === 0) return;
       file = new File([text], `file.${highlightingLanguage}`);
-    };
+    }
 
     let url = "";
     try {
@@ -156,7 +147,6 @@
           text="encryption is 100% client-side. the server only ever sees the file name, size, type, and the encrypted data."
         /></label
       >
-      <!-- NOTE: add a (?) note that tells the user it's client-side encrypted, the filename is not though -->
       <button
         name="encryption"
         id="encryption"
