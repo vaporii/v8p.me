@@ -92,7 +92,14 @@
   @use "../../../vars" as *;
 
   #file-upload {
-    display: none;
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  #file-upload:focus ~ #file-upload-container {
+    outline: $focus-outline;
   }
 
   .drag-over {
