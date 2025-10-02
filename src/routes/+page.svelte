@@ -7,11 +7,13 @@
   import WriteText from "../components/page/upload/WriteText.svelte";
   import FileSelector from "../components/page/upload/FileSelector.svelte";
   import { upload } from "$lib/uploader";
-  import { times } from "$lib/times";
+  import ExpiryDateSelector from "../components/page/options/ExpiryDateSelector.svelte";
 
   let abortController = new AbortController();
 
   let buttonDisabled = $state(false);
+
+  let expiresIn = $state(0);
 
   let encryptionEnabled = $state(false);
   let buttonText = $state("upload file or text");
@@ -48,7 +50,7 @@
       url = await upload({
         file,
         encrypt: encryptionEnabled,
-        expirationDate: expirationDate,
+        expirationDate: expiresIn + Math.floor(Date.now() / 1000),
         password: password,
         onProgress(phase, percent) {
           progressPercentage = percent;
@@ -80,12 +82,6 @@
       acknowledge();
     }
   }
-
-  let expirationDateUnit = $state(times.week);
-  let expirationNumber: number = $state(1);
-  let expirationDate = $derived(
-    expirationNumber * expirationDateUnit + Math.floor(Date.now() / 1000)
-  );
 
   let highlightingLanguage = $derived(!!files?.item(0) ? "binary" : "txt");
 </script>
@@ -153,28 +149,7 @@
         disabled={!encryptionEnabled}
         bind:value={password}
       />
-      <label for="expiry" class="option-label">expiry date</label>
-      <div class="expiry-wrapper">
-        <input
-          type="number"
-          name="expiry"
-          id="expiry"
-          bind:value={expirationNumber}
-          disabled={expirationDateUnit === 0}
-        />
-        <select name="dates" id="dates" bind:value={expirationDateUnit}>
-          <option value={times.minute}>minutes</option>
-          <option value={times.hour}>hours</option>
-          <option value={times.day}>days</option>
-          <option value={times.week}>weeks</option>
-          <option value={times.month}>months</option>
-          <option value={times.year}>years</option>
-          <option value={times.decade}>decades</option>
-          <option value={times.century}>centuries</option>
-          <option value={times.millennium}>millennia</option>
-          <option value={0}>none</option>
-        </select>
-      </div>
+      <ExpiryDateSelector bind:expiresIn></ExpiryDateSelector>
       <label for="language" class="option-label"
         >language<Help
           text="set the language to control how written text is displayed in the file preview page."
@@ -318,13 +293,6 @@
     grid-template-rows: 1fr 1fr;
     grid-template-columns: auto auto;
 
-    gap: $padding;
-  }
-
-  .expiry-wrapper {
-    display: grid;
-    grid-template-rows: 1fr;
-    grid-template-columns: 1fr 40%;
     gap: $padding;
   }
 
