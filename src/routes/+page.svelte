@@ -8,12 +8,14 @@
   import FileSelector from "../components/page/upload/FileSelector.svelte";
   import { upload } from "$lib/uploader";
   import ExpiryDateSelector from "../components/page/options/ExpiryDateSelector.svelte";
+  import HighlightingLanguageSelector from "../components/page/options/HighlightingLanguageSelector.svelte";
 
   let abortController = new AbortController();
 
   let buttonDisabled = $state(false);
 
   let expiresIn = $state(0);
+  let highlightingLanguage = $state("txt");
 
   let encryptionEnabled = $state(false);
   let buttonText = $state("upload file or text");
@@ -83,7 +85,7 @@
     }
   }
 
-  let highlightingLanguage = $derived(!!files?.item(0) ? "binary" : "txt");
+  // let highlightingLanguage = $derived(!!files?.item(0) ? "binary" : "txt");
 </script>
 
 <svelte:window onkeyup={handleKeyUp} />
@@ -102,7 +104,6 @@
   <Module text="upload file">
     <div class="upload-file">
       <FileSelector bind:files></FileSelector>
-      <!-- <UploadFile {file}></UploadFile> -->
 
       <div class="or-separator">
         <span class="or-line"></span>
@@ -150,17 +151,8 @@
         bind:value={password}
       />
       <ExpiryDateSelector bind:expiresIn></ExpiryDateSelector>
-      <label for="language" class="option-label"
-        >language<Help
-          text="set the language to control how written text is displayed in the file preview page."
-        /></label
-      >
-      <select name="langs" id="langs" bind:value={highlightingLanguage} disabled={!!files?.item(0)}>
-        {#each fileTypes as fileType}
-          <option value={fileType.ext}>{fileType.langName} (.{fileType.ext})</option>
-        {/each}
-        <option value="binary">file</option>
-      </select>
+      <HighlightingLanguageSelector bind:highlightingLanguage disabled={!!files?.item(0)}
+      ></HighlightingLanguageSelector>
     </div>
   </Module>
 </div>
