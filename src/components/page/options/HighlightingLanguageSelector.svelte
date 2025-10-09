@@ -28,4 +28,8 @@
     display: flex;
     margin: auto 0;
   }
+
+  select {
+    min-width: 0;
+  }
 </style>
