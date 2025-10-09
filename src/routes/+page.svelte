@@ -9,10 +9,11 @@
   import { upload } from "$lib/uploader";
   import ExpiryDateSelector from "../components/page/options/ExpiryDateSelector.svelte";
   import HighlightingLanguageSelector from "../components/page/options/HighlightingLanguageSelector.svelte";
+  import Switch from "../components/Switch.svelte";
 
   let abortController = new AbortController();
 
-  let buttonDisabled = $state(false);
+  let uploadButtonDisabled = $state(false);
 
   let expiresIn = $state(0);
   let highlightingLanguage = $state("txt");
@@ -84,8 +85,6 @@
       acknowledge();
     }
   }
-
-  // let highlightingLanguage = $derived(!!files?.item(0) ? "binary" : "txt");
 </script>
 
 <svelte:window onkeyup={handleKeyUp} />
@@ -115,7 +114,7 @@
 
       <div class="bottom-buttons">
         <button class="cancel" onclick={cancelUploadButton}>cancel</button>
-        <button class="upload" onclick={uploadFile} disabled={buttonDisabled}>
+        <button class="upload" onclick={uploadFile} disabled={uploadButtonDisabled}>
           <div class="back-text">{buttonText}</div>
           <div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
             {buttonText}
@@ -131,15 +130,7 @@
           text="encryption is 100% client-side. the server only ever sees the file name, size, type, and the encrypted data."
         /></label
       >
-      <button
-        name="encryption"
-        id="encryption"
-        class="switch"
-        onclick={toggleEncryption}
-        aria-label="Toggle Encryption"
-      >
-        <div class={(encryptionEnabled ? "switch-active " : "") + "switch-circle"}></div>
-      </button>
+      <Switch bind:isActive={encryptionEnabled} label="encryption"></Switch>
 
       <label for="password" class="option-label">password</label>
       <input

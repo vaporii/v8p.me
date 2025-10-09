@@ -1,53 +1,56 @@
 <script lang="ts">
   let {
     isActive = $bindable(false),
-    label,
-    onClick
+    label
   }: {
     isActive?: boolean;
     label: string;
-    onClick?: (e: MouseEvent) => void;
   } = $props();
-  const click = onClick || (() => {});
-
-  function toggleActive(e: MouseEvent) {
-    isActive = !isActive;
-    click(e);
-  }
 </script>
 
-<button class="switch" onclick={toggleActive} aria-label={label}>
+<label class="switch" aria-label={label}>
+  <input type="checkbox" bind:checked={isActive} aria-label={label} />
   <div class={(isActive ? "switch-active" : "") + " switch-circle"}></div>
-</button>
+</label>
 
 <style lang="scss">
   @use "../vars" as *;
 
   .switch {
-    all: none;
+    position: relative;
     display: inline-block;
 
-    width: 68px;
+    width: 62px;
     height: 33px;
-    background-color: $bg-0-soft;
-    padding: 0;
-    border: $module-border solid $fg-1;
+    box-sizing: border-box;
+    margin-left: auto;
 
+    border: $module-border solid $fg-1;
+    background-color: $bg-0-soft;
     cursor: pointer;
+
+    input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+  }
+
+  .switch:has(input:focus) {
+    outline: $focus-outline;
   }
 
   .switch-circle {
     width: 25px;
     height: 25px;
-
     background-color: $fg-1;
     margin: 2px;
-
     transition: all 200ms cubic-bezier(1, 0, 0, 1);
   }
 
   .switch-active {
-    margin-left: 37px;
+    margin-left: 32px;
     background-color: $fg;
   }
 </style>
