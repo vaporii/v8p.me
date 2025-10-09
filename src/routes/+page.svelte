@@ -1,24 +1,24 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import {
-    Encryptor,
-    fileTypes,
-    formatSize,
-    persistIfNeeded,
-    roundToDecimal,
-    tryRemoveFileEntry
-  } from "$lib";
-  import type { Encrypted } from "$lib/types";
+  import { fileTypes, roundToDecimal } from "$lib";
   import Module from "../components/Module.svelte";
   import Help from "../components/Help.svelte";
   import Popup from "../components/Popup.svelte";
+  import WriteText from "../components/page/upload/WriteText.svelte";
+  import FileSelector from "../components/page/upload/FileSelector.svelte";
+  import { upload } from "$lib/uploader";
+  import ExpiryDateSelector from "../components/page/options/ExpiryDateSelector.svelte";
+  import HighlightingLanguageSelector from "../components/page/options/HighlightingLanguageSelector.svelte";
+  import Switch from "../components/Switch.svelte";
 
-  let buttonDisabled = $state(false);
+  let abortController = new AbortController();
+
+  let uploadButtonDisabled = $state(false);
+
+  let expiresIn = $state(0);
+  let highlightingLanguage = $state("txt");
 
   let encryptionEnabled = $state(false);
-  let fileName = $state("drop file here");
-  let fileSize = $state("or, click to choose");
-  let iconSrc = $state("/icons/upload.svg");
   let buttonText = $state("upload file or text");
   let text = $state("");
   let password = $state("");
@@ -27,209 +27,48 @@
   let popupText = $state("");
   let displayingPopup = $state(false);
 
-  let dragging = $state(false);
-
-  let file: File | undefined = $state();
-
-  const encryptor = new Encryptor();
-
-  // function to stop uploading or encrypting at whatever step
-  // set in encryption and uploading functions
-  let stopUploadOrEncrypt = async () => {};
+  let files: FileList | undefined | null = $state();
 
   function toggleEncryption() {
     encryptionEnabled = !encryptionEnabled;
   }
 
-  function handleFileChange(e: Event) {
-    const target = e.target as HTMLInputElement;
-    if (target.files && target.files.length > 0) {
-      file = target.files[0];
-      setImagePreview();
-    }
-  }
-
-  async function cancelUpload(removeFile?: boolean) {
-    await stopUploadOrEncrypt();
-
-    if (removeFile) {
-      fileName = "drop file here";
-      fileSize = "or, click to choose";
-      iconSrc = "/icons/upload.svg";
-
-      file = undefined;
-      text = "";
-    }
-
-    buttonText = "upload file or text";
-    progressPercentage = 0;
-
-    buttonDisabled = false;
-  }
-
   function cancelUploadButton() {
-    cancelUpload(true);
-  }
-
-  function uploadProgressEvent(progress: ProgressEvent<XMLHttpRequestEventTarget>) {
-    if (progress.lengthComputable) {
-      progressPercentage = (progress.loaded / progress.total) * 100;
-      buttonText = `uploading file... ${roundToDecimal(progressPercentage, 2)}%`;
-    }
-  }
-
-  async function encryptFile(blob: Blob, password: string): Promise<Encrypted> {
-    const encrypted = await encryptor.encrypt(blob, password, (loaded, total) => {
-      buttonText = `encrypting file... ${roundToDecimal((loaded / total) * 100, 2)}%`;
-      progressPercentage = (loaded / total) * 100;
-    });
-
-    return encrypted;
+    abortController.abort(new Error("upload file or text"));
+    files = new DataTransfer().files;
+    text = "";
   }
 
   async function uploadFile() {
-    let thisFile: File;
-    if (file) {
-      thisFile = file;
-    } else if (text.length > 0) {
-      thisFile = new File([new TextEncoder().encode(text)], `file.${highlightingLanguage}`, {
-        type: "text/plain"
-      });
-    } else return; // TODO: error for not having file or text
-
-    const name = thisFile.name;
-    const type = thisFile.type;
-    const size = thisFile.size;
-    const encrypted = encryptionEnabled;
-
-    let root: FileSystemDirectoryHandle | undefined;
-
-    buttonDisabled = true;
-    buttonText = "starting...";
-
-    if (encryptionEnabled) {
-      if (password.length === 0) {
-        popupText = "password empty :(";
-        displayingPopup = true;
-
-        await cancelUpload();
-        return;
-      }
-
-      if (!(await persistIfNeeded(thisFile.size))) {
-        popupText =
-          "persistent storage could not be enabled. some large files may not load properly or entirely";
-        displayingPopup = true;
-      }
-
-      root = await navigator.storage.getDirectory();
-      await tryRemoveFileEntry(root, "file_v8p.me");
-
-      const draftHandle = await root.getFileHandle("file_v8p.me", { create: true });
-      const writable = await draftHandle.createWritable();
-
-      const stream = await encryptFile(thisFile, password);
-      stopUploadOrEncrypt = async () => {
-        stream.cancel();
-      };
-
-      try {
-        await stream.stream.pipeTo(writable);
-      } catch (e) {
-        if (e) {
-          console.error(e);
-          alert("error encrypting file. you probably don't have enough space on your drive"); // TODO: replace with an actual error
-        }
-        await cancelUpload();
-        return;
-      }
-
-      thisFile = await draftHandle.getFile();
-    } else {
-      await persistIfNeeded(thisFile.size);
-    }
-
-    const xhr = new XMLHttpRequest();
-    xhr.upload.addEventListener("progress", uploadProgressEvent);
-
-    xhr.open("POST", "/api", true);
-
-    xhr.setRequestHeader("Content-Type", "application/octet-stream");
-    xhr.setRequestHeader("X-File-Name", encodeURIComponent(name));
-    xhr.setRequestHeader("X-File-Type", type.length === 0 ? "text/plain" : type);
-    xhr.setRequestHeader("X-File-Size", size.toString());
-    xhr.setRequestHeader("X-Encrypted", String(Number(encrypted)));
-    if (expirationDateUnit > 0 && expirationNumber > 0) {
-      xhr.setRequestHeader("X-Expiration-Date", expirationDate.toString());
-    }
-
-    // NOTE: progress only works properly on chrome for some reason?
-    // NOTE: maybe not
-    xhr.send(thisFile);
-
-    stopUploadOrEncrypt = async () => {
-      xhr.abort();
-      root?.removeEntry("file_v8p.me");
-    };
-
-    xhr.addEventListener("readystatechange", (e) => {
-      if (xhr.readyState === XMLHttpRequest.DONE) {
-        root?.removeEntry("file_v8p.me");
-        if (xhr.status >= 200 && xhr.status < 400) {
-          buttonText = "uploaded!";
-          goto(xhr.responseText);
-        } else {
-          buttonText = "failed";
-        }
-      }
-    });
-  }
-
-  // janky fix for javascript's shitty drag and drop api
-  let enterTarget: EventTarget | null;
-  function dropHandler(e: DragEvent) {
-    e.preventDefault();
-    dragging = false;
-
-    if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
-      if (e.dataTransfer.items[0].kind !== "file") return;
-      file = e.dataTransfer.items[0].getAsFile() as File;
-
-      setImagePreview();
-    }
-  }
-
-  function setImagePreview() {
+    let file = files?.item(0);
     if (!file) {
-      return;
+      if (text.length === 0) return;
+      file = new File([text], `file.${highlightingLanguage}`);
     }
 
-    fileName = file.name;
-    fileSize = formatSize(file.size);
-    if (file.type.startsWith("image/")) {
-      iconSrc = URL.createObjectURL(file);
-    } else {
-      iconSrc = "/icons/file.svg";
+    let url = "";
+    try {
+      abortController = new AbortController();
+
+      url = await upload({
+        file,
+        encrypt: encryptionEnabled,
+        expirationDate: expiresIn + Math.floor(Date.now() / 1000),
+        password: password,
+        onProgress(phase, percent) {
+          progressPercentage = percent;
+          buttonText = `${phase}... ${roundToDecimal(percent, 2)}%`;
+        },
+        abortController
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        progressPercentage = 0.0;
+        buttonText = e.message;
+      }
     }
-  }
 
-  function dragOverHandler(e: DragEvent) {
-    e.preventDefault();
-  }
-
-  function dragEnterHandler(e: Event) {
-    enterTarget = e.target;
-    e.stopPropagation();
-    e.preventDefault();
-    dragging = true;
-  }
-
-  function dragLeaveHandler(e: Event) {
-    if (enterTarget === e.target) {
-      e.stopPropagation();
-      e.preventDefault();
-      dragging = false;
-    }
+    goto(url);
   }
 
   let acknowledge: () => any = $state(() => {});
@@ -246,45 +85,9 @@
       acknowledge();
     }
   }
-
-  class Times {
-    second = 1;
-    minute = this.second * 60;
-    hour = this.minute * 60;
-    day = this.hour * 24;
-    week = this.day * 7;
-    month = this.day * 30.4375;
-    year = this.month * 12;
-    decade = this.year * 10;
-    century = this.decade * 10;
-    millennium = this.century * 10;
-  }
-  const times = new Times();
-
-  let expirationDateUnit = $state(times.week);
-  let expirationNumber: number = $state(1);
-  let expirationDate = $derived(
-    expirationNumber * expirationDateUnit + Math.floor(Date.now() / 1000)
-  );
-
-  let highlightingLanguage = $derived(!!file ? "binary" : "txt");
-
-  async function handlePaste(e: ClipboardEvent) {
-    for (const item of e.clipboardData?.items ?? []) {
-      if (item.kind === "string") continue;
-
-      const thisFile = item.getAsFile();
-      if (!thisFile) continue;
-
-      file = thisFile;
-
-      setImagePreview();
-      return;
-    }
-  }
 </script>
 
-<svelte:window onpaste={handlePaste} onkeyup={handleKeyUp} />
+<svelte:window onkeyup={handleKeyUp} />
 
 <svelte:head>
   <title>v8p.me</title>
@@ -299,42 +102,19 @@
 <div class="center">
   <Module text="upload file">
     <div class="upload-file">
-      <input type="file" name="file-upload" id="file-upload" onchange={handleFileChange} />
-      <label
-        id="file-select"
-        class={dragging ? "dragging" : ""}
-        for="file-upload"
-        ondrop={dropHandler}
-        ondragover={dragOverHandler}
-        ondragenter={dragEnterHandler}
-        ondragleave={dragLeaveHandler}
-      >
-        <img
-          src={iconSrc}
-          style={iconSrc.endsWith(".svg")
-            ? ""
-            : "width: auto; height: auto; max-width: 100%; max-height: 200px;"}
-          alt="upload file icon"
-          class="upload-icon"
-        />
-        <span class="big-text">{fileName}</span>
-        <span class="little-text">{fileSize}</span>
-      </label>
+      <FileSelector bind:files></FileSelector>
+
       <div class="or-separator">
         <span class="or-line"></span>
         <span class="or-text">OR</span>
         <span class="or-line"></span>
       </div>
-      <textarea
-        name="text"
-        id="text"
-        placeholder="write some text..."
-        disabled={!!file}
-        bind:value={text}
-      ></textarea>
+
+      <WriteText disabled={!!files?.item(0)} bind:text></WriteText>
+
       <div class="bottom-buttons">
         <button class="cancel" onclick={cancelUploadButton}>cancel</button>
-        <button class="upload" onclick={uploadFile} disabled={buttonDisabled}>
+        <button class="upload" onclick={uploadFile} disabled={uploadButtonDisabled}>
           <div class="back-text">{buttonText}</div>
           <div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
             {buttonText}
@@ -350,16 +130,7 @@
           text="encryption is 100% client-side. the server only ever sees the file name, size, type, and the encrypted data."
         /></label
       >
-      <!-- NOTE: add a (?) note that tells the user it's client-side encrypted, the filename is not though -->
-      <button
-        name="encryption"
-        id="encryption"
-        class="switch"
-        onclick={toggleEncryption}
-        aria-label="Toggle Encryption"
-      >
-        <div class={(encryptionEnabled ? "switch-active " : "") + "switch-circle"}></div>
-      </button>
+      <Switch bind:isActive={encryptionEnabled} label="encryption"></Switch>
 
       <label for="password" class="option-label">password</label>
       <input
@@ -370,39 +141,9 @@
         disabled={!encryptionEnabled}
         bind:value={password}
       />
-      <label for="expiry" class="option-label">expiry date</label>
-      <div class="expiry-wrapper">
-        <input
-          type="number"
-          name="expiry"
-          id="expiry"
-          bind:value={expirationNumber}
-          disabled={expirationDateUnit === 0}
-        />
-        <select name="dates" id="dates" bind:value={expirationDateUnit}>
-          <option value={times.minute}>minutes</option>
-          <option value={times.hour}>hours</option>
-          <option value={times.day}>days</option>
-          <option value={times.week}>weeks</option>
-          <option value={times.month}>months</option>
-          <option value={times.year}>years</option>
-          <option value={times.decade}>decades</option>
-          <option value={times.century}>centuries</option>
-          <option value={times.millennium}>millennia</option>
-          <option value={0}>none</option>
-        </select>
-      </div>
-      <label for="language" class="option-label"
-        >language<Help
-          text="set the language to control how written text is displayed in the file preview page."
-        /></label
-      >
-      <select name="langs" id="langs" bind:value={highlightingLanguage} disabled={!!file}>
-        {#each fileTypes as fileType}
-          <option value={fileType.ext}>{fileType.langName} (.{fileType.ext})</option>
-        {/each}
-        <option value="binary">file</option>
-      </select>
+      <ExpiryDateSelector bind:expiresIn></ExpiryDateSelector>
+      <HighlightingLanguageSelector bind:highlightingLanguage disabled={!!files?.item(0)}
+      ></HighlightingLanguageSelector>
     </div>
   </Module>
 </div>
@@ -411,7 +152,7 @@
   text={popupText}
   bind:displaying={displayingPopup}
   bind:submit={acknowledge}
-  onCancel={cancelUpload}
+  onCancel={cancelUploadButton}
 ></Popup>
 
 <style lang="scss">
@@ -428,63 +169,6 @@
 
   .upload-file {
     position: relative;
-  }
-
-  #file-select {
-    display: flex;
-
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-
-    width: 100%;
-    min-height: 170px;
-    padding: $padding;
-
-    background-color: $bg-0-soft;
-    cursor: pointer;
-  }
-
-  .dragging {
-    border: $drag-border;
-  }
-
-  .upload-icon {
-    width: 45px;
-    height: auto;
-  }
-
-  .big-text {
-    all: unset;
-    overflow: hidden;
-    display: block;
-    text-overflow: ellipsis;
-    white-space: pre-line;
-    word-wrap: break-word;
-
-    max-height: calc(3 * 1.4em);
-    width: 100%;
-    line-height: 1.4em;
-
-    font-size: $header-size;
-    text-align: center;
-  }
-
-  .little-text {
-    font-size: $small-font-size;
-    color: $bg-4;
-  }
-
-  #file-upload {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-
-  #file-upload:focus ~ #file-select {
-    outline: $focus-outline;
   }
 
   .or-separator {
@@ -510,12 +194,6 @@
     color: $bg-3;
   }
 
-  textarea {
-    width: 100%;
-    height: 170px;
-    margin-bottom: $padding;
-  }
-
   .bottom-buttons {
     display: flex;
 
@@ -528,15 +206,6 @@
 
   .upload {
     position: relative;
-  }
-
-  .loading-bar {
-    position: absolute;
-    background-color: $accent;
-    height: 100%;
-    bottom: 0;
-    left: 0;
-    width: 100%;
   }
 
   .back-text {
@@ -569,56 +238,6 @@
     grid-template-columns: auto auto;
 
     gap: $padding;
-  }
-
-  .expiry-wrapper {
-    display: grid;
-    grid-template-rows: 1fr;
-    grid-template-columns: 1fr 40%;
-    gap: $padding;
-  }
-
-  .help-icon {
-    margin-left: $smaller-padding;
-  }
-
-  .switch {
-    all: none;
-    display: inline-block;
-    position: relative;
-
-    width: 62px;
-    height: 33px;
-    box-sizing: border-box;
-    padding: 2px;
-    margin-left: auto;
-
-    border: $module-border solid $fg-1;
-    background-color: $bg-0-soft;
-    cursor: pointer;
-
-    user-select: none;
-  }
-
-  .switch-circle {
-    position: absolute;
-
-    top: 2px;
-    bottom: 2px;
-    left: 2px;
-    right: 50%;
-
-    background-color: $fg-1;
-    transition:
-      left 200ms cubic-bezier(1, 0, 0, 1),
-      right 200ms cubic-bezier(1, 0, 0, 1);
-  }
-
-  .switch-active {
-    left: 50%;
-    right: 2px;
-
-    background-color: $fg;
   }
 
   .option-label {
