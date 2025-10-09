@@ -9,10 +9,11 @@
   import { upload } from "$lib/uploader";
   import ExpiryDateSelector from "../components/page/options/ExpiryDateSelector.svelte";
   import HighlightingLanguageSelector from "../components/page/options/HighlightingLanguageSelector.svelte";
+  import Switch from "../components/Switch.svelte";
 
   let abortController = new AbortController();
 
-  let buttonDisabled = $state(false);
+  let uploadButtonDisabled = $state(false);
 
   let expiresIn = $state(0);
   let highlightingLanguage = $state("txt");
@@ -84,8 +85,6 @@
       acknowledge();
     }
   }
-
-  // let highlightingLanguage = $derived(!!files?.item(0) ? "binary" : "txt");
 </script>
 
 <svelte:window onkeyup={handleKeyUp} />
@@ -115,7 +114,7 @@
 
       <div class="bottom-buttons">
         <button class="cancel" onclick={cancelUploadButton}>cancel</button>
-        <button class="upload" onclick={uploadFile} disabled={buttonDisabled}>
+        <button class="upload" onclick={uploadFile} disabled={uploadButtonDisabled}>
           <div class="back-text">{buttonText}</div>
           <div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
             {buttonText}
@@ -131,15 +130,7 @@
           text="encryption is 100% client-side. the server only ever sees the file name, size, type, and the encrypted data."
         /></label
       >
-      <button
-        name="encryption"
-        id="encryption"
-        class="switch"
-        onclick={toggleEncryption}
-        aria-label="Toggle Encryption"
-      >
-        <div class={(encryptionEnabled ? "switch-active " : "") + "switch-circle"}></div>
-      </button>
+      <Switch bind:isActive={encryptionEnabled} label="encryption"></Switch>
 
       <label for="password" class="option-label">password</label>
       <input
@@ -180,36 +171,6 @@
     position: relative;
   }
 
-  .dragging {
-    border: $drag-border;
-  }
-
-  .upload-icon {
-    width: 45px;
-    height: auto;
-  }
-
-  .big-text {
-    all: unset;
-    overflow: hidden;
-    display: block;
-    text-overflow: ellipsis;
-    white-space: pre-line;
-    word-wrap: break-word;
-
-    max-height: calc(3 * 1.4em);
-    width: 100%;
-    line-height: 1.4em;
-
-    font-size: $header-size;
-    text-align: center;
-  }
-
-  .little-text {
-    font-size: $small-font-size;
-    color: $bg-4;
-  }
-
   .or-separator {
     display: flex;
 
@@ -247,15 +208,6 @@
     position: relative;
   }
 
-  .loading-bar {
-    position: absolute;
-    background-color: $accent;
-    height: 100%;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-  }
-
   .back-text {
     display: flex;
     justify-content: center;
@@ -286,49 +238,6 @@
     grid-template-columns: auto auto;
 
     gap: $padding;
-  }
-
-  .help-icon {
-    margin-left: $smaller-padding;
-  }
-
-  .switch {
-    all: none;
-    display: inline-block;
-    position: relative;
-
-    width: 62px;
-    height: 33px;
-    box-sizing: border-box;
-    padding: 2px;
-    margin-left: auto;
-
-    border: $module-border solid $fg-1;
-    background-color: $bg-0-soft;
-    cursor: pointer;
-
-    user-select: none;
-  }
-
-  .switch-circle {
-    position: absolute;
-
-    top: 2px;
-    bottom: 2px;
-    left: 2px;
-    right: 50%;
-
-    background-color: $fg-1;
-    transition:
-      left 200ms cubic-bezier(1, 0, 0, 1),
-      right 200ms cubic-bezier(1, 0, 0, 1);
-  }
-
-  .switch-active {
-    left: 50%;
-    right: 2px;
-
-    background-color: $fg;
   }
 
   .option-label {
