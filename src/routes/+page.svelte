@@ -171,36 +171,6 @@
     position: relative;
   }
 
-  .dragging {
-    border: $drag-border;
-  }
-
-  .upload-icon {
-    width: 45px;
-    height: auto;
-  }
-
-  .big-text {
-    all: unset;
-    overflow: hidden;
-    display: block;
-    text-overflow: ellipsis;
-    white-space: pre-line;
-    word-wrap: break-word;
-
-    max-height: calc(3 * 1.4em);
-    width: 100%;
-    line-height: 1.4em;
-
-    font-size: $header-size;
-    text-align: center;
-  }
-
-  .little-text {
-    font-size: $small-font-size;
-    color: $bg-4;
-  }
-
   .or-separator {
     display: flex;
 
@@ -238,15 +208,6 @@
     position: relative;
   }
 
-  .loading-bar {
-    position: absolute;
-    background-color: $accent;
-    height: 100%;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-  }
-
   .back-text {
     display: flex;
     justify-content: center;
@@ -277,49 +238,6 @@
     grid-template-columns: auto auto;
 
     gap: $padding;
-  }
-
-  .help-icon {
-    margin-left: $smaller-padding;
-  }
-
-  .switch {
-    all: none;
-    display: inline-block;
-    position: relative;
-
-    width: 62px;
-    height: 33px;
-    box-sizing: border-box;
-    padding: 2px;
-    margin-left: auto;
-
-    border: $module-border solid $fg-1;
-    background-color: $bg-0-soft;
-    cursor: pointer;
-
-    user-select: none;
-  }
-
-  .switch-circle {
-    position: absolute;
-
-    top: 2px;
-    bottom: 2px;
-    left: 2px;
-    right: 50%;
-
-    background-color: $fg-1;
-    transition:
-      left 200ms cubic-bezier(1, 0, 0, 1),
-      right 200ms cubic-bezier(1, 0, 0, 1);
-  }
-
-  .switch-active {
-    left: 50%;
-    right: 2px;
-
-    background-color: $fg;
   }
 
   .option-label {
