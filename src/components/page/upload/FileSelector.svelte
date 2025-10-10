@@ -135,4 +135,10 @@
     background-color: $bg-0-soft;
     cursor: pointer;
   }
+
+  @media screen and (min-height: 750px) {
+    #file-upload-container {
+      height: 160px;
+    }
+  }
 </style>
