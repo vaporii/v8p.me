@@ -19,4 +19,10 @@
     height: 100px;
     margin-bottom: $padding;
   }
+
+  @media screen and (min-height: 750px) {
+    textarea {
+      height: 150px;
+    }
+  }
 </style>
