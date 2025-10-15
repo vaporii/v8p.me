@@ -17,6 +17,13 @@
 
   let expiresIn = $state(0);
   let highlightingLanguage = $state("txt");
+  $effect(() => {
+    if (!!files?.item(0)) {
+      highlightingLanguage = "binary";
+    } else {
+      highlightingLanguage = "txt";
+    }
+  });
 
   let encryptionEnabled = $state(false);
   let buttonText = $state("upload file or text");
