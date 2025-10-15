@@ -125,9 +125,10 @@ input {
   width: 100%;
 }
 
-input[type="password"] {
-  letter-spacing: 5px;
-  font-size: $password-font-size;
+input[type="password"]::placeholder {
+  // letter-spacing: 5px;
+  // font-size: $password-font-size;
+  color: $fg;
 }
 
 input:focus {
