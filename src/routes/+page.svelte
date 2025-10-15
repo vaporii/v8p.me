@@ -139,6 +139,7 @@
         type="password"
         class="textbox"
         disabled={!encryptionEnabled}
+        placeholder={encryptionEnabled ? "" : "enable encryption"}
         bind:value={password}
       />
       <ExpiryDateSelector bind:expiresIn></ExpiryDateSelector>
