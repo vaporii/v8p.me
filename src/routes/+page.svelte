@@ -29,10 +29,6 @@
 
   let files: FileList | undefined | null = $state();
 
-  function toggleEncryption() {
-    encryptionEnabled = !encryptionEnabled;
-  }
-
   function cancelUploadButton() {
     abortController.abort(new Error("upload file or text"));
     files = new DataTransfer().files;
