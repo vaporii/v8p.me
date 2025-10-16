@@ -209,7 +209,6 @@ export const fileTypes: { ext: string; lang: LanguageType<string>; langName: str
   { ext: "ini", lang: langs.ini, langName: "ini" },
   { ext: "java", lang: langs.java, langName: "java" },
   { ext: "js", lang: langs.javascript, langName: "javascript" },
-  { ext: "js", lang: langs.javascript, langName: "javascript" },
   { ext: "json", lang: langs.json, langName: "json" },
   { ext: "lua", lang: langs.lua, langName: "lua" },
   { ext: "makefile", lang: langs.makefile, langName: "makefile" },
