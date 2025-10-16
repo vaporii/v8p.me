@@ -192,7 +192,7 @@
       </div>
     {:else}
       <div class="wrapper">
-        <div>
+        <div class="fileinfo-wrapper">
           <div class="filename">{data.fileName}</div>
           <div class="info">{formatSize(data.fileSize)} • {data.fileType}</div>
         </div>
@@ -236,12 +236,19 @@
     font-weight: bold;
     font-size: $font-size;
     color: $fg-1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .fileinfo-wrapper {
+    width: 0;
+    flex: 1;
   }
 
   .download-icon {
     height: 40px;
     align-self: center;
-    margin-left: auto;
   }
 
   .download-icon img {
