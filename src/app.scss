@@ -59,7 +59,7 @@ button:disabled {
   opacity: $disabled-opacity;
 }
 
-button:focus {
+button:focus-visible {
   outline: $focus-outline;
 }
 
@@ -96,7 +96,7 @@ textarea {
   font-size: $font-size;
 }
 
-textarea:focus {
+textarea:focus-visible {
   outline: $focus-outline;
 }
 
@@ -131,11 +131,11 @@ input[type="password"]::placeholder {
   color: $fg;
 }
 
-input:focus {
+input:focus-visible {
   outline: $focus-outline;
 }
 
-.switch:focus {
+.switch:focus-visible {
   outline: $focus-outline;
 }
 
@@ -146,7 +146,7 @@ select {
   cursor: pointer;
 }
 
-select:focus {
+select:focus-visible {
   outline: $focus-outline;
 }
 

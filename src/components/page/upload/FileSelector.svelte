@@ -98,7 +98,7 @@
     height: 0;
   }
 
-  #file-upload:focus ~ #file-upload-container {
+  #file-upload:focus-visible ~ #file-upload-container {
     outline: $focus-outline;
   }
 
