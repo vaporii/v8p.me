@@ -110,8 +110,11 @@
     font-size: $header-size;
     max-width: 100%;
 
-    overflow: hidden;
+    text-align: center;
+
     text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   .subtitle {
