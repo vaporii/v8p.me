@@ -66,8 +66,8 @@
       });
     } catch (e) {
       if (e instanceof Error) {
-        progressPercentage = 0.0;
-        buttonText = e.message;
+        popupText = e.message;
+        displayingPopup = true;
       }
     }
 

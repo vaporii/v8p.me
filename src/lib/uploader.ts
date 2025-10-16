@@ -34,7 +34,7 @@ export async function upload({
 
     try {
       if (encrypt) {
-        if (!password) throw new Error("password empty");
+        if (!password) throw new Error("encryption is enabled, but the password is empty. please enter a password to encrypt a file");
 
         if (!(await persistIfNeeded(file.size))) {
           onError(
