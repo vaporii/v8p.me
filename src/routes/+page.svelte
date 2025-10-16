@@ -17,6 +17,13 @@
 
   let expiresIn = $state(0);
   let highlightingLanguage = $state("txt");
+  $effect(() => {
+    if (!!files?.item(0)) {
+      highlightingLanguage = "binary";
+    } else {
+      highlightingLanguage = "txt";
+    }
+  });
 
   let encryptionEnabled = $state(false);
   let buttonText = $state("upload file or text");
@@ -28,10 +35,6 @@
   let displayingPopup = $state(false);
 
   let files: FileList | undefined | null = $state();
-
-  function toggleEncryption() {
-    encryptionEnabled = !encryptionEnabled;
-  }
 
   function cancelUploadButton() {
     abortController.abort(new Error("upload file or text"));
@@ -63,8 +66,8 @@
       });
     } catch (e) {
       if (e instanceof Error) {
-        progressPercentage = 0.0;
-        buttonText = e.message;
+        popupText = e.message;
+        displayingPopup = true;
       }
     }
 
@@ -139,6 +142,7 @@
         type="password"
         class="textbox"
         disabled={!encryptionEnabled}
+        placeholder={encryptionEnabled ? "" : "enable encryption"}
         bind:value={password}
       />
       <ExpiryDateSelector bind:expiresIn></ExpiryDateSelector>

@@ -15,11 +15,11 @@
 
   const type = fileInfo.fileType.split("/")[0];
 
-  const split = fileInfo.fileName.split(".");
-  const ext = split[split.length - 1];
+  const parts = fileInfo.fileName.split(".");
+  const ext = parts.length > 1 ? parts.pop() : parts[0];
 
   const language = fileTypes.find((type) => {
-    return type.ext === ext;
+    return type.ext === ext?.toLowerCase();
   });
 
   async function getText() {
