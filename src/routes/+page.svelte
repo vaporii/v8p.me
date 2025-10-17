@@ -32,15 +32,21 @@
   let password = $state("");
   let progressPercentage = $state(0.0);
 
+  let uploading = $state(false);
+
   let popupText = $state("");
   let displayingPopup = $state(false);
 
   let files: FileList | undefined | null = $state();
 
-  function cancelUploadButton() {
-    abortController.abort();
+  function cancelUpload() {
+    abortController.abort(new Error(""));
     files = new DataTransfer().files;
     text = "";
+    buttonText = "upload file or text";
+    progressPercentage = 0;
+    uploading = false;
+    abortController = new AbortController();
   }
 
   async function zipFiles(files: FileList, onProgress?: (progress: number) => void) {
@@ -127,7 +133,6 @@
         displayingPopup = true;
       }
     }
-
   }
 
   let acknowledge: () => any = $state(() => {});
@@ -172,7 +177,7 @@
       <WriteText disabled={!!files?.item(0)} bind:text></WriteText>
 
       <div class="bottom-buttons">
-        <button class="cancel" onclick={cancelUploadButton}>cancel</button>
+        <button class="cancel" onclick={cancelUpload}>cancel</button>
         <button class="upload" onclick={processFiles} disabled={uploadButtonDisabled}>
           <div class="back-text">{buttonText}</div>
           <div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
@@ -212,7 +217,7 @@
   text={popupText}
   bind:displaying={displayingPopup}
   bind:submit={acknowledge}
-  onCancel={cancelUploadButton}
+  onCancel={cancelUpload}
 ></Popup>
 
 <style lang="scss">
