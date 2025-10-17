@@ -112,29 +112,25 @@
   }
 
   async function uploadSingleFile(file: File) {
-    try {
-      abortController = new AbortController();
+    abortController = new AbortController();
 
-      const url = await upload({
-        file,
-        encrypt: encryptionEnabled,
-        expirationDate: expiresIn + Math.floor(Date.now() / 1000),
-        password: password,
-        onProgress(phase, percent) {
-          progressPercentage = percent;
-          buttonText = `${phase}... ${roundToDecimal(percent, 2)}%`;
-        },
-        abortController
-      });
-
-      goto(url);
-    } catch (e) {
-      if (e instanceof Error) {
-        if (e.message.length === 0) return;
-        popupText = e.message;
+    const url = await upload({
+      file,
+      encrypt: encryptionEnabled,
+      expirationDate: expiresIn + Math.floor(Date.now() / 1000),
+      password: password,
+      onProgress(phase, percent) {
+        progressPercentage = percent;
+        buttonText = `${phase}... ${roundToDecimal(percent, 2)}%`;
+      },
+      onErrorMessage(errMessage) {
+        popupText = errMessage;
         displayingPopup = true;
-      }
-    }
+      },
+      abortController
+    });
+
+    goto(url);
   }
 
   let acknowledge: () => any = $state(() => {});
