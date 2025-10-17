@@ -38,13 +38,15 @@
   let files: FileList | undefined | null = $state();
 
   function cancelUploadButton() {
-    abortController.abort(new Error("upload file or text"));
+    abortController.abort();
     files = new DataTransfer().files;
     text = "";
   }
 
   async function zipFiles(files: FileList, onProgress?: (progress: number) => void) {
     const handle = await getStorageFileHandle("files.zip", abortController);
+    abortController.signal.throwIfAborted();
+
     const writable = await handle.createWritable();
 
     const zipper = new ZipWriterStream();
@@ -66,13 +68,17 @@
         processedBytes += value.byteLength;
         onProgress?.(processedBytes / totalBytes);
         await writer.write(value);
+        abortController.signal.throwIfAborted();
       }
 
+      abortController.signal.throwIfAborted();
       await writer.close();
     }
 
     zipper.close();
+    abortController.signal.throwIfAborted();
     await pipe;
+    abortController.signal.throwIfAborted();
     const file = await handle.getFile();
     return file;
   }
@@ -82,23 +88,26 @@
       if (text.length === 0) return;
 
       return uploadSingleFile(new File([text], `file.${highlightingLanguage}`));
-    };
+    }
     if (files.length === 1) return uploadSingleFile(files[0]);
-
-    const file = await zipFiles(files, (progress) => {
-      progressPercentage = progress * 100;
-      buttonText = `zipping... ${roundToDecimal(progressPercentage, 2)}%`;
-    });
-    console.log(URL.createObjectURL(file));
-    await uploadSingleFile(file);
+    try {
+      const file = await zipFiles(files, (progress) => {
+        progressPercentage = progress * 100;
+        buttonText = `zipping... ${roundToDecimal(progressPercentage, 2)}%`;
+      });
+      console.log(URL.createObjectURL(file));
+      await uploadSingleFile(file);
+    } catch {
+      progressPercentage = 0;
+      buttonText = `upload file or text`;
+    }
   }
 
   async function uploadSingleFile(file: File) {
-    let url = "";
     try {
       abortController = new AbortController();
 
-      url = await upload({
+      const url = await upload({
         file,
         encrypt: encryptionEnabled,
         expirationDate: expiresIn + Math.floor(Date.now() / 1000),
@@ -109,14 +118,16 @@
         },
         abortController
       });
+      
+      goto(url);
     } catch (e) {
       if (e instanceof Error) {
+        if (e.message.length === 0) return;
         popupText = e.message;
         displayingPopup = true;
       }
     }
 
-    goto(url);
   }
 
   let acknowledge: () => any = $state(() => {});
