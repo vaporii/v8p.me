@@ -13,7 +13,7 @@
   let fileDetails = $derived.by(() => {
     console.log(files);
     let info = {
-      titles: ["drop file here"],
+      titles: ["drop files here"],
       subtitle: "or, click to choose",
       iconPath: "/icons/upload.svg"
     };
