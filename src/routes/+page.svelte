@@ -78,7 +78,11 @@
   }
 
   async function processFiles() {
-    if (!files?.length) return;
+    if (!files?.length) {
+      if (text.length === 0) return;
+
+      return uploadSingleFile(new File([text], `file.${highlightingLanguage}`));
+    };
     if (files.length === 1) return uploadSingleFile(files[0]);
 
     const file = await zipFiles(files, (progress) => {
@@ -86,15 +90,10 @@
       buttonText = `zipping... ${roundToDecimal(progressPercentage, 2)}%`;
     });
     console.log(URL.createObjectURL(file));
-    // await uploadFile(file);
+    await uploadSingleFile(file);
   }
 
   async function uploadSingleFile(file: File) {
-    if (!file) {
-      if (text.length === 0) return;
-      file = new File([text], `file.${highlightingLanguage}`);
-    }
-
     let url = "";
     try {
       abortController = new AbortController();
