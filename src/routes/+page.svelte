@@ -40,13 +40,12 @@
   let files: FileList | undefined | null = $state();
 
   function cancelUpload() {
-    abortController.abort(new Error(""));
+    abortController.abort(new Error("cancelled"));
     files = new DataTransfer().files;
     text = "";
     buttonText = "upload file or text";
     progressPercentage = 0;
     uploading = false;
-    abortController = new AbortController();
   }
 
   async function zipFiles(files: FileList, onProgress?: (progress: number) => void) {
@@ -89,9 +88,20 @@
     return file;
   }
 
-  async function processFiles() {
+  async function startUpload() {
     if (uploading) return;
+    abortController = new AbortController();
+    uploading = true;
 
+    try {
+      await processFiles();
+    } catch (e) {
+      uploading = false;
+      throw e;
+    }
+  }
+
+  async function processFiles() {
     if (!files?.length) {
       if (text.length === 0) return;
 
@@ -176,18 +186,7 @@
 
       <div class="bottom-buttons">
         <button class="cancel" onclick={cancelUpload}>cancel</button>
-        <button
-          class="upload"
-          onclick={async () => {
-            if (uploading) return;
-            uploading = true;
-            try {
-              await processFiles();
-            } catch {}
-            uploading = false;
-          }}
-          disabled={uploadButtonDisabled}
-        >
+        <button class="upload" onclick={startUpload} disabled={uploadButtonDisabled}>
           <div class="back-text">{buttonText}</div>
           <div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
             {buttonText}
