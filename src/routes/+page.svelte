@@ -37,9 +37,12 @@
   let files: FileList | undefined | null = $state();
 
   function cancelUploadButton() {
-    abortController.abort(new Error("upload file or text"));
+    abortController.abort(new Error(""));
     files = new DataTransfer().files;
     text = "";
+    buttonText = "upload file or text";
+    progressPercentage = 0;
+    abortController = new AbortController();
   }
 
   async function uploadFile() {
@@ -49,11 +52,8 @@
       file = new File([text], `file.${highlightingLanguage}`);
     }
 
-    let url = "";
     try {
-      abortController = new AbortController();
-
-      url = await upload({
+      const url = await upload({
         file,
         encrypt: encryptionEnabled,
         expirationDate: expiresIn + Math.floor(Date.now() / 1000),
@@ -64,14 +64,15 @@
         },
         abortController
       });
+      goto(url);
     } catch (e) {
       if (e instanceof Error) {
+        if (e.message.length === 0) return;
         popupText = e.message;
         displayingPopup = true;
       }
     }
 
-    goto(url);
   }
 
   let acknowledge: () => any = $state(() => {});
