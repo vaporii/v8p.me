@@ -9,7 +9,7 @@ export type UploadOptions = {
   onStateChange?: (
     state: "init" | "upload" | "upload_complete" | "encrypt" | "encrypt_complete" | "end"
   ) => void;
-  onError?: (err: Error) => void;
+  onErrorMessage?: (errMessage: string) => void;
   abortController?: AbortController;
 };
 
@@ -37,7 +37,7 @@ export async function upload({
   expirationDate = 0,
   onProgress = (_phase, _percent) => {},
   onStateChange: stateChange = (_state) => {},
-  onError = (_err) => {},
+  onErrorMessage = (_err) => {},
   abortController = new AbortController()
 }: UploadOptions): Promise<string> {
   return new Promise(async (resolve, reject) => {
@@ -51,16 +51,17 @@ export async function upload({
 
     try {
       if (encrypt) {
-        if (!password)
-          throw new Error(
+        if (!password) {
+          onErrorMessage(
             "encryption is enabled, but the password is empty. please enter a password to encrypt a file"
           );
+          reject(new Error("no password"));
+          return;
+        }
 
         if (!(await persistIfNeeded(file.size))) {
-          onError(
-            new Error(
-              "persistent storage could not be enabled. some large files may not load properly or entirely"
-            )
+          onErrorMessage(
+            "persistent storage could not be enabled. some large files may not load properly or entirely"
           );
         }
 
@@ -72,7 +73,6 @@ export async function upload({
 
         stateChange("encrypt");
 
-        console.log(password);
         const stream = await encryptor.encrypt(workingFile, password, (loaded, total) => {
           onProgress("encrypting", (loaded / total) * 100);
         });
@@ -134,14 +134,18 @@ export async function upload({
           } else {
             signal.throwIfAborted();
             stateChange("end");
-            onError(new Error(xhr.statusText));
+            onErrorMessage(
+              "unexpected server error. try again later, and submit a github issue if you're feeling kind"
+            );
             reject(new Error(xhr.statusText));
           }
         }
       });
     } catch (err) {
       stateChange("end");
-      onError(Error.isError(err) ? err : new Error("error"));
+      onErrorMessage(
+        "unexpected error. try again later, and submit a github issue if you're feeling kind"
+      );
       reject(err);
     }
   });
