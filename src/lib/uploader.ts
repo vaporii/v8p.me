@@ -13,6 +13,23 @@ export type UploadOptions = {
   abortController?: AbortController;
 };
 
+export async function getStorageFileHandle(
+  filename: string,
+  { signal }: { signal: AbortSignal }
+): Promise<FileSystemFileHandle> {
+  signal.throwIfAborted();
+
+  const root = await navigator.storage.getDirectory();
+
+  signal.throwIfAborted();
+  await tryRemoveFileEntry(root, filename);
+
+  signal.throwIfAborted();
+  const fileHandle = await root.getFileHandle(filename, { create: true });
+
+  return fileHandle;
+}
+
 export async function upload({
   file,
   encrypt = false,
@@ -34,7 +51,10 @@ export async function upload({
 
     try {
       if (encrypt) {
-        if (!password) throw new Error("encryption is enabled, but the password is empty. please enter a password to encrypt a file");
+        if (!password)
+          throw new Error(
+            "encryption is enabled, but the password is empty. please enter a password to encrypt a file"
+          );
 
         if (!(await persistIfNeeded(file.size))) {
           onError(
@@ -45,13 +65,10 @@ export async function upload({
         }
 
         signal.throwIfAborted();
-        root = await navigator.storage.getDirectory();
 
-        signal.throwIfAborted();
-        await tryRemoveFileEntry(root, "file_v8p.me");
-
-        const draftHandle = await root.getFileHandle("file_v8p.me", { create: true });
+        const draftHandle = await getStorageFileHandle("file_v8p.me", { signal });
         const writable = await draftHandle.createWritable();
+        root = await navigator.storage.getDirectory();
 
         stateChange("encrypt");
 
