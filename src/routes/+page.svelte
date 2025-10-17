@@ -90,6 +90,8 @@
   }
 
   async function processFiles() {
+    if (uploading) return;
+
     if (!files?.length) {
       if (text.length === 0) return;
 
@@ -124,7 +126,7 @@
         },
         abortController
       });
-      
+
       goto(url);
     } catch (e) {
       if (e instanceof Error) {
@@ -178,7 +180,18 @@
 
       <div class="bottom-buttons">
         <button class="cancel" onclick={cancelUpload}>cancel</button>
-        <button class="upload" onclick={processFiles} disabled={uploadButtonDisabled}>
+        <button
+          class="upload"
+          onclick={async () => {
+            if (uploading) return;
+            uploading = true;
+            try {
+              await processFiles();
+            } catch {}
+            uploading = false;
+          }}
+          disabled={uploadButtonDisabled}
+        >
           <div class="back-text">{buttonText}</div>
           <div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
             {buttonText}
