@@ -6,10 +6,11 @@
   import Popup from "../components/Popup.svelte";
   import WriteText from "../components/page/upload/WriteText.svelte";
   import FileSelector from "../components/page/upload/FileSelector.svelte";
-  import { upload } from "$lib/uploader";
+  import { getStorageFileHandle, upload } from "$lib/uploader";
   import ExpiryDateSelector from "../components/page/options/ExpiryDateSelector.svelte";
   import HighlightingLanguageSelector from "../components/page/options/HighlightingLanguageSelector.svelte";
   import Switch from "../components/Switch.svelte";
+  import { ZipWriterStream } from "@zip.js/zip.js";
 
   let abortController = new AbortController();
 
@@ -42,8 +43,53 @@
     text = "";
   }
 
-  async function uploadFile() {
-    let file = files?.item(0);
+  async function zipFiles(files: FileList, onProgress?: (progress: number) => void) {
+    const handle = await getStorageFileHandle("files.zip", abortController);
+    const writable = await handle.createWritable();
+
+    const zipper = new ZipWriterStream();
+    const pipe = zipper.readable.pipeTo(writable);
+
+    let totalBytes = 0;
+    for (const file of files) totalBytes += file.size;
+
+    let processedBytes = 0;
+
+    for (const file of files) {
+      const reader = file.stream().getReader();
+      const writable = zipper.writable(file.name);
+      const writer = writable.getWriter();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        processedBytes += value.byteLength;
+        onProgress?.(processedBytes / totalBytes);
+        await writer.write(value);
+      }
+
+      await writer.close();
+    }
+
+    zipper.close();
+    await pipe;
+    const file = await handle.getFile();
+    return file;
+  }
+
+  async function processFiles() {
+    if (!files?.length) return;
+    if (files.length === 1) return uploadSingleFile(files[0]);
+
+    const file = await zipFiles(files, (progress) => {
+      progressPercentage = progress * 100;
+      buttonText = `zipping... ${roundToDecimal(progressPercentage, 2)}%`;
+    });
+    console.log(URL.createObjectURL(file));
+    // await uploadFile(file);
+  }
+
+  async function uploadSingleFile(file: File) {
     if (!file) {
       if (text.length === 0) return;
       file = new File([text], `file.${highlightingLanguage}`);
@@ -81,7 +127,7 @@
       e.stopImmediatePropagation();
       e.stopPropagation();
       e.preventDefault();
-      uploadFile();
+      processFiles();
     }
     if (e.key === "Escape") {
       e.preventDefault();
@@ -117,7 +163,7 @@
 
       <div class="bottom-buttons">
         <button class="cancel" onclick={cancelUploadButton}>cancel</button>
-        <button class="upload" onclick={uploadFile} disabled={uploadButtonDisabled}>
+        <button class="upload" onclick={processFiles} disabled={uploadButtonDisabled}>
           <div class="back-text">{buttonText}</div>
           <div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
             {buttonText}
