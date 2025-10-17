@@ -52,7 +52,7 @@
 </script>
 
 <div>
-  <input type="file" name="file-upload" id="file-upload" bind:files />
+  <input type="file" name="file-upload" id="file-upload" bind:files multiple />
   <label
     for="file-upload"
     ondrop={dropHandler}
