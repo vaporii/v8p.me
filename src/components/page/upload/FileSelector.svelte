@@ -10,10 +10,11 @@
 
   let draggingOver = $state(false);
 
+  let titleOverride = $state("");
   let fileDetails = $derived.by(() => {
     console.log(files);
     let info = {
-      titles: ["drop files here"],
+      titles: [titleOverride.length > 0 ? titleOverride : "drop files here"],
       subtitle: "or, click to choose",
       iconPath: "/icons/upload.svg"
     };
@@ -44,7 +45,9 @@
     e.preventDefault();
     draggingOver = false;
     if (e.dataTransfer === null || e.dataTransfer.files.length === 0) return;
+    titleOverride = "loading...";
     files = await getFilesFromDataTransfer(e.dataTransfer);
+    titleOverride = "";
   }
 
   function startDragging(e: DragEvent) {
