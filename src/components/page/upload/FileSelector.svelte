@@ -1,5 +1,6 @@
 <script lang="ts">
   import { formatSize } from "$lib";
+  import { getFilesFromDataTransfer } from "$lib/files";
 
   let {
     files = $bindable()
@@ -10,30 +11,40 @@
   let draggingOver = $state(false);
 
   let fileDetails = $derived.by(() => {
+    console.log(files);
     let info = {
-      title: "drop file here",
+      titles: ["drop file here"],
       subtitle: "or, click to choose",
       iconPath: "/icons/upload.svg"
     };
 
-    const file = files?.item(0);
-    if (file) {
-      info.title = file.name;
+    if (!files?.length) return info;
+
+    if (files.length === 1) {
+      const file = files[0];
+      info.titles = [file.name];
       info.subtitle = formatSize(file.size);
       info.iconPath = "/icons/file.svg";
+    } else {
+      let totalSize = 0;
+      info.titles = [];
+      for (const file of files) {
+        totalSize += file.size;
+        info.titles.push(file.name);
+      }
+
+      info.subtitle = `${files.length} files totalling ${formatSize(totalSize)}`;
     }
 
     return info;
   });
 
   let enterTarget: EventTarget | null;
-  function dropHandler(e: DragEvent) {
+  async function dropHandler(e: DragEvent) {
     e.preventDefault();
     draggingOver = false;
-
     if (e.dataTransfer === null || e.dataTransfer.files.length === 0) return;
-    if (e.dataTransfer.items[0].kind !== "file") return;
-    files = e.dataTransfer.files;
+    files = await getFilesFromDataTransfer(e.dataTransfer);
   }
 
   function startDragging(e: DragEvent) {
@@ -70,8 +81,14 @@
     }}
     id="file-upload-container"
   >
-    <img class="icon" src={fileDetails.iconPath} alt="upload file icon" />
-    <span class="header">{fileDetails.title}</span>
+    {#if fileDetails.titles.length === 1}
+      <img class="icon" src={fileDetails.iconPath} alt="upload file icon" />
+    {/if}
+    <div class={"headers" + (fileDetails.titles.length > 1 ? " file-list" : "")}>
+      {#each fileDetails.titles as title}
+        <div class="header">{title}</div>
+      {/each}
+    </div>
     <span class="subtitle">{fileDetails.subtitle}</span>
   </label>
 </div>
@@ -107,14 +124,27 @@
   }
 
   .header {
-    font-size: $header-size;
     max-width: 100%;
-
-    text-align: center;
 
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+  }
+
+  .headers {
+    font-size: $header-size;
+    text-align: center;
+    max-width: 100%;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .file-list {
+    font-size: $small-font-size;
+    text-align: left;
+
+    margin-bottom: $smaller-padding;
   }
 
   .subtitle {
@@ -137,11 +167,6 @@
     padding: $padding;
     background-color: $bg-0-soft;
     cursor: pointer;
-  }
-
-  @media screen and (min-height: 750px) {
-    #file-upload-container {
-      height: 160px;
-    }
+    height: 160px;
   }
 </style>
