@@ -5,7 +5,7 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
   };
 
-  outputs = { self, nixpkgs }@inputs:
+  outputs = { nixpkgs, ... }:
   let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
@@ -17,10 +17,6 @@
         pkgs.nodejs_latest
         pkgs.python3
       ];
-
-      shellHook = ''
-        ${pkgs.nodejs}/bin/npm install
-      '';
     };
 
     # nixosModules.default = self.nixosModules."v8p.me";

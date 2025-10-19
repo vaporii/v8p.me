@@ -37,7 +37,7 @@
     }
   }
 
-  .switch:has(input:focus) {
+  .switch:has(input:focus-visible) {
     outline: $focus-outline;
   }
 

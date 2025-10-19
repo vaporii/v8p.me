@@ -96,8 +96,5 @@
     position: absolute;
     top: $module-text-top;
     right: $module-text-left;
-
-    outline: none;
   }
-
 </style>

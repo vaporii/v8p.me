@@ -6,10 +6,11 @@
   import Popup from "../components/Popup.svelte";
   import WriteText from "../components/page/upload/WriteText.svelte";
   import FileSelector from "../components/page/upload/FileSelector.svelte";
-  import { upload } from "$lib/uploader";
+  import { getStorageFileHandle, upload } from "$lib/uploader";
   import ExpiryDateSelector from "../components/page/options/ExpiryDateSelector.svelte";
   import HighlightingLanguageSelector from "../components/page/options/HighlightingLanguageSelector.svelte";
   import Switch from "../components/Switch.svelte";
+  import { ZipWriterStream } from "@zip.js/zip.js";
 
   let abortController = new AbortController();
 
@@ -31,45 +32,113 @@
   let password = $state("");
   let progressPercentage = $state(0.0);
 
+  let uploading = $state(false);
+
   let popupText = $state("");
   let displayingPopup = $state(false);
 
   let files: FileList | undefined | null = $state();
 
-  function cancelUploadButton() {
-    abortController.abort(new Error("upload file or text"));
+  function cancelUpload() {
+    abortController.abort(new Error("cancelled"));
     files = new DataTransfer().files;
     text = "";
+    buttonText = "upload file or text";
+    progressPercentage = 0;
+    uploading = false;
   }
 
-  async function uploadFile() {
-    let file = files?.item(0);
-    if (!file) {
-      if (text.length === 0) return;
-      file = new File([text], `file.${highlightingLanguage}`);
-    }
+  async function zipFiles(files: FileList, onProgress?: (progress: number) => void) {
+    const handle = await getStorageFileHandle("files.zip", abortController);
+    abortController.signal.throwIfAborted();
 
-    let url = "";
-    try {
-      abortController = new AbortController();
+    const writable = await handle.createWritable();
 
-      url = await upload({
-        file,
-        encrypt: encryptionEnabled,
-        expirationDate: expiresIn + Math.floor(Date.now() / 1000),
-        password: password,
-        onProgress(phase, percent) {
-          progressPercentage = percent;
-          buttonText = `${phase}... ${roundToDecimal(percent, 2)}%`;
-        },
-        abortController
-      });
-    } catch (e) {
-      if (e instanceof Error) {
-        popupText = e.message;
-        displayingPopup = true;
+    const zipper = new ZipWriterStream();
+    const pipe = zipper.readable.pipeTo(writable);
+
+    let totalBytes = 0;
+    for (const file of files) totalBytes += file.size;
+
+    let processedBytes = 0;
+
+    for (const file of files) {
+      const reader = file.stream().getReader();
+      const writable = zipper.writable(file.name);
+      const writer = writable.getWriter();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        processedBytes += value.byteLength;
+        onProgress?.(processedBytes / totalBytes);
+        await writer.write(value);
+        abortController.signal.throwIfAborted();
       }
+
+      abortController.signal.throwIfAborted();
+      await writer.close();
     }
+
+    zipper.close();
+    abortController.signal.throwIfAborted();
+    await pipe;
+    abortController.signal.throwIfAborted();
+    const file = await handle.getFile();
+    return file;
+  }
+
+  async function startUpload() {
+    if (uploading) return;
+    abortController = new AbortController();
+    uploading = true;
+
+    try {
+      await processFiles();
+    } catch (e) {
+      uploading = false;
+      throw e;
+    }
+  }
+
+  async function processFiles() {
+    if (!files?.length) {
+      if (text.length === 0) return;
+
+      return uploadSingleFile(new File([text], `file.${highlightingLanguage}`));
+    }
+    if (files.length === 1) return uploadSingleFile(files[0]);
+    try {
+      const file = await zipFiles(files, (progress) => {
+        progressPercentage = progress * 100;
+        buttonText = `zipping... ${roundToDecimal(progressPercentage, 2)}%`;
+      });
+      console.log(URL.createObjectURL(file));
+      await uploadSingleFile(file);
+    } catch {
+      progressPercentage = 0;
+      buttonText = `upload file or text`;
+    }
+  }
+
+  async function uploadSingleFile(file: File) {
+    abortController = new AbortController();
+
+    const url = await upload({
+      file,
+      encrypt: encryptionEnabled,
+      expirationDate: expiresIn + Math.floor(Date.now() / 1000),
+      password: password,
+      onProgress(phase, percent) {
+        progressPercentage = percent;
+        buttonText = `${phase}... ${roundToDecimal(percent, 2)}%`;
+      },
+      onErrorMessage(errMessage) {
+        popupText = errMessage;
+        displayingPopup = true;
+      },
+      abortController
+    });
 
     goto(url);
   }
@@ -81,7 +150,7 @@
       e.stopImmediatePropagation();
       e.stopPropagation();
       e.preventDefault();
-      uploadFile();
+      processFiles();
     }
     if (e.key === "Escape") {
       e.preventDefault();
@@ -116,8 +185,8 @@
       <WriteText disabled={!!files?.item(0)} bind:text></WriteText>
 
       <div class="bottom-buttons">
-        <button class="cancel" onclick={cancelUploadButton}>cancel</button>
-        <button class="upload" onclick={uploadFile} disabled={uploadButtonDisabled}>
+        <button class="cancel" onclick={cancelUpload}>cancel</button>
+        <button class="upload" onclick={startUpload} disabled={uploadButtonDisabled}>
           <div class="back-text">{buttonText}</div>
           <div class="front-text" style="clip-path: inset(0 0 0 {progressPercentage}%);">
             {buttonText}
@@ -156,7 +225,7 @@
   text={popupText}
   bind:displaying={displayingPopup}
   bind:submit={acknowledge}
-  onCancel={cancelUploadButton}
+  onCancel={cancelUpload}
 ></Popup>
 
 <style lang="scss">
