@@ -66,6 +66,7 @@
         <button
           class="table-filename"
           disabled={loadingStates[result.filename]}
+          title={result.filename}
           onclick={async () => {
             if (result.directory || loadingStates[result.filename]) return;
             await downloadEntry(result);
@@ -90,6 +91,8 @@
     display: grid;
     grid-template-columns: 1fr auto;
     width: 100%;
+    overflow: auto;
+    max-height: 50vw;
   }
 
   .table-filename {
