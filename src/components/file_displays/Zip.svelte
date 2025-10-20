@@ -24,14 +24,6 @@
     }
   }
 
-  function startDots(filename: string) {
-    dotCounts[filename] = 1;
-    const interval = setInterval(() => {
-      dotCounts[filename] = (dotCounts[filename] % 3) + 1;
-      if (!loadingStates[filename]) clearInterval(interval);
-    }, 500);
-  }
-
   function getFilename(path: string): string {
     return path.split(/[/\\]/).pop() || "";
   }
