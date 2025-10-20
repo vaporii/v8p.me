@@ -7,6 +7,7 @@
   import Text from "./file_displays/Text.svelte";
   import type { FileInfo } from "$lib/types";
   import { fileTypes } from "$lib";
+  import Zip from "./file_displays/Zip.svelte";
 
   let { fileInfo, url, children }: { fileInfo: FileInfo; url: string; children: Snippet } =
     $props();
@@ -61,6 +62,9 @@
       your browser doesn't support this audio type :(
     </audio>
   </div>
+  {@render children()}
+{:else if ext === "zip"}
+  <Zip {url}></Zip>
   {@render children()}
 {/if}
 
