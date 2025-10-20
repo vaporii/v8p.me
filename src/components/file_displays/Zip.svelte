@@ -28,6 +28,8 @@
 </div>
 
 <style lang="scss">
+  @use "/src/vars" as *;
+  
   #file-table {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -38,10 +40,19 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: $accent;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .table-filename:hover {
+    color: $accent-hover;
   }
 
   .table-filesize {
     white-space: nowrap;
     text-align: right;
+
+    color: $fg-1;
   }
 </style>
