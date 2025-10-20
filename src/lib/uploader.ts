@@ -15,16 +15,16 @@ export type UploadOptions = {
 
 export async function getStorageFileHandle(
   filename: string,
-  { signal }: { signal: AbortSignal }
+  { signal }: { signal?: AbortSignal }
 ): Promise<FileSystemFileHandle> {
-  signal.throwIfAborted();
+  signal?.throwIfAborted();
 
   const root = await navigator.storage.getDirectory();
 
-  signal.throwIfAborted();
+  signal?.throwIfAborted();
   await tryRemoveFileEntry(root, filename);
 
-  signal.throwIfAborted();
+  signal?.throwIfAborted();
   const fileHandle = await root.getFileHandle(filename, { create: true });
 
   return fileHandle;
