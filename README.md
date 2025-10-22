@@ -8,6 +8,8 @@ a basic file uploading service built with svelte featuring client-side encryptio
 
 - completely server safe client-side file encryption and decryption
 - quick text uploading
+- zip previewing
+- multi-file and directory uploads
 - optional file expiration dates
 - sleek, utility-esque look and feel built with gruvbox
 - file preview
@@ -18,20 +20,21 @@ a basic file uploading service built with svelte featuring client-side encryptio
 ### screenshots
 
 main page
-![main page](https://github.com/user-attachments/assets/d12ca950-364a-4179-b002-7d4f46e6e4f6)
-video preview
-![file preview](https://github.com/user-attachments/assets/629cc696-b0b9-4e97-8159-a98f230945c6)
+![main page](./assets/main_page.png)
+video preview ([full video here](https://v8p.me/XPbqCf))
+![video preview](./assets/video.png)
 code syntax highlighting
-![code preview](https://github.com/user-attachments/assets/da9a4331-54f4-4a49-a543-241591846d31)
+![code preview](./assets/code.png)
 
 ### usage
 
-~~while i'm working on a docker implementation,~~ if you don't want to use docker, here is a (probably not production-safe) example.
+if you don't want to use docker, here is a (probably not production-safe) example:
 
 ```bash
 git clone https://github.com/vaporii/v8p.me
 cd v8p.me
 mv .env.example .env
+mkdir -p data/files
 
 npm i
 npm run build
@@ -52,7 +55,9 @@ docker run --name v8p.me -p 3000:3000 -d v8p.me
 or, if you use docker compose:
 
 ```bash
-# ...
+git clone https://github.com/vaporii/v8p.me
+cd v8p.me
+mv .env.example .env
 
 docker build -t v8p.me .
 docker compose up -d
