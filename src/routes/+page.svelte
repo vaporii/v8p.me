@@ -127,7 +127,7 @@
     const url = await upload({
       file,
       encrypt: encryptionEnabled,
-      expirationDate: expiresIn + Math.floor(Date.now() / 1000),
+      expirationDate: expiresIn === 0 ? 0 : (expiresIn + Math.floor(Date.now() / 1000)),
       password: password,
       onProgress(phase, percent) {
         progressPercentage = percent;

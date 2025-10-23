@@ -20,10 +20,15 @@ a basic file uploading service built with svelte featuring client-side encryptio
 ### screenshots
 
 main page
+
 ![main page](./assets/main_page.png)
+
 video preview ([full video here](https://v8p.me/XPbqCf))
+
 ![video preview](./assets/video.png)
+
 code syntax highlighting
+
 ![code preview](./assets/code.png)
 
 ### usage
