@@ -146,11 +146,11 @@
   {#if !data.encrypted}
     <meta property="og:title" content={data.fileName + " • v8p.me"} />
     <meta property="og:description" content={formatSize(data.fileSize) + " • " + data.fileType} />
-    {#if data.fileType.startsWith("image") && data.fileSize < 1000 * 1000 * 10}
+    {#if data.fileType.startsWith("image") && data.fileSize < 1000 * 1000 * 30}
       <meta property="og:image" content={`/${data.alias}/direct`} />
       <meta property="og:image:type" content={data.fileType} />
       <meta name="twitter:card" content="summary_large_image" />
-    {:else if data.fileType.startsWith("video") && data.fileSize < 1000 * 1000 * 10}
+    {:else if data.fileType.startsWith("video") && data.fileSize < 1000 * 1000 * 30}
       <meta property="og:video" content={`/${data.alias}/direct`} />
       <meta property="og:video:type" content={data.fileType} />
       <meta name="twitter:card" content="player" />
